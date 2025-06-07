@@ -199,6 +199,66 @@ namespace es_solicitudes.Controller.impl
         }
 
         /// <summary>
+        /// Cambia el estado de una solicitud y registra la acción en el log de auditoría.
+        /// </summary>
+        /// <param name="request">Datos para el cambio de estado.</param>
+        /// <returns>Mensaje con el resultado de la operación.</returns>
+        /// <response code="200">Estado actualizado exitosamente</response>
+        /// <response code="400">Datos de entrada inválidos</response>
+        /// <response code="404">Solicitud no encontrada</response>
+        /// <response code="500">Error interno del servidor</response>
+        [HttpPost("cambiar-estado")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> CambiarEstado(CambiarEstadoSolicitudType request)
+        {
+            using var scope = _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["solicitudId"] = request.SolicitudId,
+                ["nuevoEstadoId"] = request.NuevoEstadoId,
+                ["usuarioAccionId"] = request.UsuarioAccionId
+            });
+
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "CambiarEstado",
+                    request.SolicitudId
+                );
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { Success = false, Message = ApiConstants.ErrorMessages.InvalidInput, Errors = ModelState.Values.SelectMany(v => v.Errors) });
+                }
+
+                var result = await _service.CambiarEstado(request.SolicitudId, request.NuevoEstadoId, request.UsuarioAccionId);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "CambiarEstado",
+                    request.SolicitudId,
+                    "Success"
+                );
+
+                return Ok(new { Success = true, Message = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    ApiConstants.LogMessages.OperationError,
+                    "CambiarEstado",
+                    ex.Message
+                );
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Obtiene el listado completo de catálogos.
         /// </summary>
         /// <returns>Lista de catálogos.</returns>

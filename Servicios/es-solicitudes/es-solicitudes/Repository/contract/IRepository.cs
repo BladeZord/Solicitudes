@@ -40,5 +40,14 @@ namespace es_solicitudes.Repository.contract
         /// <param name="id">Identificador de la solicitud a eliminar.</param>
         /// <returns>True si la solicitud fue eliminada exitosamente, false en caso contrario.</returns>
         Task<bool> Eliminar(int id);
+
+        /// <summary>
+        /// Cambia el estado de una solicitud y registra la acción en el log de auditoría.
+        /// </summary>
+        /// <param name="solicitudId">ID de la solicitud a modificar.</param>
+        /// <param name="nuevoEstadoId">ID del nuevo estado.</param>
+        /// <param name="usuarioAccionId">ID del usuario que realiza la acción.</param>
+        /// <returns>True si el cambio fue exitoso, false en caso contrario.</returns>
+        Task<bool> CambiarEstado(int solicitudId, int nuevoEstadoId, int usuarioAccionId);
     }
 } 

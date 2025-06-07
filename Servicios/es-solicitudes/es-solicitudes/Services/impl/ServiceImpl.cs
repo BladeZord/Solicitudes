@@ -173,5 +173,40 @@ namespace es_solicitudes.Services.impl
                 throw new ServiceException($"Error al eliminar la solicitud: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Cambia el estado de una solicitud y registra la acción en el log de auditoría.
+        /// </summary>
+        /// <param name="solicitudId">ID de la solicitud a modificar.</param>
+        /// <param name="nuevoEstadoId">ID del nuevo estado.</param>
+        /// <param name="usuarioAccionId">ID del usuario que realiza la acción.</param>
+        /// <returns>Mensaje con el resultado de la operación.</returns>
+        public async Task<string> CambiarEstado(int solicitudId, int nuevoEstadoId, int usuarioAccionId)
+        {
+            const string operation = nameof(CambiarEstado);
+
+            using var scope = _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["solicitudId"] = solicitudId,
+                ["nuevoEstadoId"] = nuevoEstadoId,
+                ["usuarioAccionId"] = usuarioAccionId
+            });
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation, new { solicitudId, nuevoEstadoId, usuarioAccionId });
+
+                var resultado = await _repository.CambiarEstado(solicitudId, nuevoEstadoId, usuarioAccionId);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { solicitudId, Status = "Success" });
+
+                return resultado ? "Estado de la solicitud actualizado exitosamente" : "No se pudo actualizar el estado de la solicitud";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al cambiar el estado de la solicitud: {ex.Message}");
+            }
+        }
     }
 }

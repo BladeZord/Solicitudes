@@ -173,12 +173,8 @@ namespace es_solicitudes.Repository.impl
                     entityType.Usuario_Id
                 };
 
-                await connection.ExecuteAsync("sp_CrearSolicitud", parameters, transaction, commandType: System.Data.CommandType.StoredProcedure);
+                var id = await connection.ExecuteScalarAsync<int>("sp_CrearSolicitud", parameters, transaction, commandType: System.Data.CommandType.StoredProcedure);
                 transaction.Commit();
-
-                // Obtener el ID de la solicitud creada
-                var sql = "SELECT TOP 1 Id FROM Solicitudes WHERE Usuario_Id = @Usuario_Id ORDER BY Fecha_registro DESC";
-                var id = await connection.ExecuteScalarAsync<int>(sql, new { entityType.Usuario_Id });
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
                 return await ObtenerPorIdDesdeConexion(id, connection);
@@ -252,6 +248,47 @@ namespace es_solicitudes.Repository.impl
                 };
 
                 var rows = await connection.ExecuteAsync("sp_EliminarSolicitud", parameters, commandType: System.Data.CommandType.StoredProcedure);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return rows > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Cambia el estado de una solicitud y registra la acción en el log de auditoría.
+        /// </summary>
+        /// <param name="solicitudId">ID de la solicitud a modificar.</param>
+        /// <param name="nuevoEstadoId">ID del nuevo estado.</param>
+        /// <param name="usuarioAccionId">ID del usuario que realiza la acción.</param>
+        /// <returns>True si el cambio fue exitoso, false en caso contrario.</returns>
+        public async Task<bool> CambiarEstado(int solicitudId, int nuevoEstadoId, int usuarioAccionId)
+        {
+            const string operation = nameof(CambiarEstado);
+            using var scope = _logger.BeginScope(new Dictionary<string, object> 
+            { 
+                ["solicitudId"] = solicitudId,
+                ["nuevoEstadoId"] = nuevoEstadoId,
+                ["usuarioAccionId"] = usuarioAccionId
+            });
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+
+                var parameters = new
+                {
+                    SolicitudId = solicitudId,
+                    NuevoEstadoId = nuevoEstadoId,
+                    UsuarioAccionId = usuarioAccionId
+                };
+
+                var rows = await connection.ExecuteAsync("sp_CambiarEstadoSolicitudYAuditar", parameters, commandType: System.Data.CommandType.StoredProcedure);
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
                 return rows > 0;
