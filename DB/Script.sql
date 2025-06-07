@@ -35,8 +35,6 @@ CREATE TABLE Solicitudes (
     Estado_Id INT NOT NULL, -- FK hacia Catalogos
     Fecha_registro DATETIME2 NOT NULL,
     Usuario_Id INT NOT NULL,
-    CONSTRAINT FK_Solicitudes_Usuario FOREIGN KEY (Usuario_Id) REFERENCES Usuarios(Id),
-    CONSTRAINT FK_Solicitudes_Estado FOREIGN KEY (Estado_Id) REFERENCES Catalogos(Id)
 );
 
 -- Tabla: Log_auditoria
@@ -53,3 +51,131 @@ CREATE TABLE Log_auditoria (
     CONSTRAINT FK_Log_Usuario FOREIGN KEY (Usuario_Id) REFERENCES Usuarios(Id),
     CONSTRAINT FK_Log_Solicitud FOREIGN KEY (Solicitud_Id) REFERENCES Solicitudes(Id)
 );
+
+
+
+/*---------------------------------------------*/
+USE SolicitudesDB;
+GO
+
+-- Crear nueva solicitud
+CREATE PROCEDURE sp_CrearSolicitud
+    @Monto DECIMAL(12,2),
+    @PlazoMeses INT,
+    @IngresosMensual DECIMAL(12,2),
+    @AntiguedadLaboral INT,
+    @Estado_Id INT,
+    @Usuario_Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Solicitudes (
+        Monto,
+        Plazo_meses,
+        Ingresos_mensual,
+        Antiguedad_laboral,
+        Estado_Id,
+        Fecha_registro,
+        Usuario_Id
+    )
+    VALUES (
+        @Monto,
+        @PlazoMeses,
+        @IngresosMensual,
+        @AntiguedadLaboral,
+        @Estado_Id,
+        SYSDATETIME(),
+        @Usuario_Id
+    );
+END
+GO
+
+-- Actualizar solicitud
+CREATE PROCEDURE sp_ActualizarSolicitud
+    @SolicitudId INT,
+    @Monto DECIMAL(12,2),
+    @PlazoMeses INT,
+    @IngresosMensual DECIMAL(12,2),
+    @AntiguedadLaboral INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Solicitudes
+    SET Monto = @Monto,
+        Plazo_meses = @PlazoMeses,
+        Ingresos_mensual = @IngresosMensual,
+        Antiguedad_laboral = @AntiguedadLaboral
+    WHERE Id = @SolicitudId;
+END
+GO
+
+-- Eliminar solicitud (cambiar estado a eliminado)
+CREATE PROCEDURE sp_EliminarSolicitud
+    @SolicitudId INT,
+    @EstadoEliminadoId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Solicitudes
+    SET Estado_Id = @EstadoEliminadoId
+    WHERE Id = @SolicitudId;
+END
+GO
+
+-- Cambiar estado y registrar en log de auditoría
+CREATE PROCEDURE sp_CambiarEstadoSolicitudYAuditar
+    @SolicitudId INT,
+    @NuevoEstadoId INT,
+    @UsuarioAccionId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @EstadoAnteriorId INT;
+
+    -- Validar que el nuevo estado existe
+    IF NOT EXISTS (
+        SELECT 1 FROM Catalogos WHERE Id = @NuevoEstadoId
+    )
+    BEGIN
+        RAISERROR('El nuevo estado no existe en el catálogo.', 16, 1);
+        RETURN;
+    END
+
+    -- Obtener estado anterior
+    SELECT @EstadoAnteriorId = Estado_Id FROM Solicitudes WHERE Id = @SolicitudId;
+
+    IF @EstadoAnteriorId IS NULL
+    BEGIN
+        RAISERROR('La solicitud especificada no existe.', 16, 1);
+        RETURN;
+    END
+
+    -- Actualizar solicitud
+    UPDATE Solicitudes
+    SET Estado_Id = @NuevoEstadoId
+    WHERE Id = @SolicitudId;
+
+    -- Insertar en log
+    INSERT INTO Log_auditoria (
+        Fecha_registro,
+        Estado_anterior_Id,
+        Estado_actual_Id,
+        Accion,
+        Usuario_Id,
+        Solicitud_Id
+    )
+    VALUES (
+        SYSDATETIME(),
+        @EstadoAnteriorId,
+        @NuevoEstadoId,
+        'CAMBIO_ESTADO',
+        @UsuarioAccionId,
+        @SolicitudId
+    );
+END
+GO
+
