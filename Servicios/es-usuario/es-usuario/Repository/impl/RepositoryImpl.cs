@@ -1,8 +1,10 @@
 ﻿using Dapper;
+
 using es_usuario.Constans;
 using es_usuario.Controller.type;
 using es_usuario.Repository.contract;
 using es_usuario.utils;
+
 using System.Data.SqlClient;
 using System.Text;
 
@@ -235,6 +237,52 @@ namespace es_usuario.Repository.impl
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
                 return rows > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// Compara si el usuario existe.
+        /// </summary>
+        /// <param name="AuthParam">Parametros de consulta.</param>
+        /// <returns>Entidad guardada con su usuario y contrañas.</returns>
+        public async Task<UsuarioType> ConsultarPorUsuarioYContrasenia(AuthType AuthParam)
+        {
+            const string operation = nameof(ConsultarPorUsuarioYContrasenia);
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+
+                var sql = @"
+                             SELECT 
+                                   u.Id,
+                                   u.Nombre,
+                                   u.Correo,
+                                   u.Rol_Id,
+                                   u.Contrasenia,
+                                   c.Descripcion AS Rol_Descripcion
+                             FROM Usuarios u
+                             INNER JOIN catalogos c ON c.id = u.Rol_Id 
+                             WHERE 
+                                c.Tipo = 'TIPO_PERSONA' AND
+                                u.Correo = @Correo AND
+                                u.Contrasenia = @Contrasenia
+                             ";
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return await connection.QueryFirstOrDefaultAsync<UsuarioType>(sql,
+                                                            new
+                                                            {
+                                                                Correo = AuthParam.Correo,
+                                                                Contrasenia = AuthParam.Contrasenia
+                                                            });
             }
             catch (Exception ex)
             {

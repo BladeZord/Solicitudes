@@ -3,6 +3,7 @@ using es_usuario.Controller.type;
 using es_usuario.exception;
 using es_usuario.Repository.contract;
 using es_usuario.Services.contract;
+using es_usuario.utils;
 
 namespace es_usuario.Services.impl
 {
@@ -23,6 +24,48 @@ namespace es_usuario.Services.impl
         {
             _repository = repository;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Consulta un usuario por su correo y contraseña
+        /// </summary>
+        /// <param name="authType">Datos de autenticación del usuario</param>
+        /// <returns>Usuario encontrado o null si no existe</returns>
+        public async Task<UsuarioType> ConsultarPorUsuarioYContrasenia(AuthType authType)
+        {
+            const string operation = nameof(ConsultarPorUsuarioYContrasenia);
+            using var scope = _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["correo"] = authType.Correo
+            });
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+                // Sanitizar las credenciales
+                var (correoSanitizado, contraseniaSanitizada) = SanitizarInput.SanitizarCredenciales(authType.Correo, authType.Contrasenia);
+                
+                if (correoSanitizado == null || contraseniaSanitizada == null)
+                {
+                    throw new ServiceException("Credenciales inválidas o mal formateadas");
+                }
+
+                var usuario = await _repository.ConsultarPorUsuarioYContrasenia(new AuthType 
+                { 
+                    Correo = correoSanitizado, 
+                    Contrasenia = contraseniaSanitizada 
+                });
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+
+                return usuario;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al consultar usuario: {ex.Message}");
+            }
         }
 
         /// <summary>

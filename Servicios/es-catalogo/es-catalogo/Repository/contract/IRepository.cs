@@ -37,8 +37,16 @@ namespace es_catalogo.Repository.contract
         /// <summary>
         /// Elimina un registro de catálogo por su identificador.
         /// </summary>
-        /// <param name="id">Identificador del registro a eliminar.</param>
+        /// <param name="Tipo">Tipo de parametros.</param>
         /// <returns>True si el registro fue eliminado exitosamente, false en caso contrario.</returns>
         Task<bool> Eliminar(int id);
+
+        /// <summary>
+        /// Obtiene todos los registros de catálogos por el tipo.
+        /// </summary>
+        /// <param name="id">Identificador del registro a eliminar.</param>
+
+        /// <returns>Lista de catálogos.</returns>
+        Task<List<CatalogoType>> ObtenerPorTipo(string Tipo);
     }
 } 

@@ -36,6 +36,13 @@ namespace es_catalogo.Controller.contract
         Task<ActionResult<object>> ObtenerListado();
 
         /// <summary>
+        /// Obtiene todos los registros de catálogos por el tipo.
+        /// </summary>
+        /// <param name="Tipo">Tipo de parametros.</param>
+        /// <returns>Lista de catálogos.</returns>
+        Task<ActionResult<object>> ObtenerPorTipo(string Tipo);
+
+        /// <summary>
         /// Obtiene un catálogo específico por su identificador.
         /// </summary>
         /// <param name="Id">Identificador del catálogo a consultar.</param>

@@ -5,6 +5,7 @@ using es_catalogo.Services.contract;
 
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
+
 using System;
 
 namespace es_catalogo.Controller.impl
@@ -233,6 +234,46 @@ namespace es_catalogo.Controller.impl
                     ex,
                     ApiConstants.LogMessages.OperationError,
                     "ObtenerListado",
+                    ex.Message
+                );
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene todos los registros de catálogos por el tipo.
+        /// </summary>
+        /// <param name="Tipo">Tipo de parametros.</param>
+        /// <returns>Lista de catálogos.</returns>
+        [HttpGet("tipo/{Tipo}")]
+        [ProducesResponseType(typeof(List<CatalogoType>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> ObtenerPorTipo(string Tipo)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "ObtenerPorTipo"
+                );
+
+                var result = await _service.ObtenerPorTipo(Tipo);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "ObtenerPorTipo",
+                    result.Count
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    ApiConstants.LogMessages.OperationError,
+                    "ObtenerPorTipo",
                     ex.Message
                 );
                 throw;

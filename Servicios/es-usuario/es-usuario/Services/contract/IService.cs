@@ -5,6 +5,13 @@ namespace es_usuario.Services.contract
     public interface IService
     {
         /// <summary>
+        /// Consulta un usuario por su correo y contraseña
+        /// </summary>
+        /// <param name="authType">Datos de autenticación del usuario</param>
+        /// <returns>Usuario encontrado o null si no existe</returns>
+        Task<UsuarioType> ConsultarPorUsuarioYContrasenia(AuthType authType);
+
+        /// <summary>
         /// Obtiene todos los registros de catálogos.
         /// </summary>
         /// <returns>Lista de catálogos.</returns>

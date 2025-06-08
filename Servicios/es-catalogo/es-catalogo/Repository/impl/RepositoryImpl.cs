@@ -1,8 +1,10 @@
 ﻿using Dapper;
+
 using es_catalogo.Constans;
 using es_catalogo.Controller.type;
 using es_catalogo.Repository.contract;
 using es_catalogo.utils;
+
 using System.Data.SqlClient;
 using System.Text;
 
@@ -49,7 +51,8 @@ namespace es_catalogo.Repository.impl
                         Id,
                         Codigo,
                         Descripcion,
-                        Padre_Id
+                        Padre_Id,
+                        Tipo
                     FROM Catalogos
                     WHERE Id = @Id";
 
@@ -82,11 +85,50 @@ namespace es_catalogo.Repository.impl
                         Id,
                         Codigo,
                         Descripcion,
-                        Padre_Id
+                        Padre_Id,
+                        Tipo
                     FROM Catalogos
                     ORDER BY Codigo";
 
                 var result = (await connection.QueryAsync<CatalogoType>(sql)).ToList();
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene todos los registros de catálogos por el tipo.
+        /// </summary>
+        /// <param name="Tipo">Tipo de parametros.</param>
+
+        /// <returns>Lista de catálogos.</returns>
+        public async Task<List<CatalogoType>> ObtenerPorTipo(string Tipo)
+        {
+            const string operation = nameof(ObtenerPorTipo);
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+
+                var sql = @"
+                    SELECT 
+                        Id,
+                        Codigo,
+                        Descripcion,
+                        Padre_Id,
+                        Tipo
+                    FROM Catalogos
+                    WHERE Tipo = @Tipo
+                    ORDER BY Codigo";
+
+                var result = (await connection.QueryAsync<CatalogoType>(sql, new { Tipo })).ToList();
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
                 return result;
@@ -149,13 +191,15 @@ namespace es_catalogo.Repository.impl
                     (
                         Codigo,
                         Descripcion,
-                        Padre_Id
+                        Padre_Id,
+                        Tipo
                     )
                     VALUES 
                     (
                         @Codigo,
                         @Descripcion,
-                        @Padre_Id
+                        @Padre_Id,
+                        @Tipo
                     );
                     SELECT SCOPE_IDENTITY();";
 
@@ -196,7 +240,8 @@ namespace es_catalogo.Repository.impl
                     UPDATE Catalogos
                     SET Codigo = @Codigo,
                         Descripcion = @Descripcion,
-                        Padre_Id = @Padre_Id
+                        Padre_Id = @Padre_Id,
+                        Tipo = @Tipo
                     WHERE Id = @Id";
 
                 await connection.ExecuteAsync(sql, entityType);

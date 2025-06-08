@@ -32,5 +32,10 @@ namespace es_catalogo.Controller.type
         /// Identificador del catálogo padre (si existe).
         /// </summary>
         public int? Padre_Id { get; set; }
+
+        /// <summary>
+        /// Tipo del catálogo padre (si existe).
+        /// </summary>
+        public string? Tipo { get; set; }
     }
 } 

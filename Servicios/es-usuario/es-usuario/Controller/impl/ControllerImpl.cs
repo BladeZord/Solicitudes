@@ -2,10 +2,15 @@
 using es_usuario.Controller.contract;
 using es_usuario.Controller.type;
 using es_usuario.Services.contract;
-
+using es_usuario.exception;
+using es_usuario.utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace es_usuario.Controller.impl
 {
@@ -19,16 +24,98 @@ namespace es_usuario.Controller.impl
     {
         private readonly IService _service;
         private readonly ILogger<ControllerImpl> _logger;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
         /// Constructor del controlador
         /// </summary>
         /// <param name="service">Servicio para la lógica de negocio</param>
         /// <param name="logger">Servicio de logging</param>
-        public ControllerImpl(IService service, ILogger<ControllerImpl> logger)
+        /// <param name="configuration">Servicio de configuración</param>
+        public ControllerImpl(
+            IService service, 
+            ILogger<ControllerImpl> logger,
+            IConfiguration configuration)
         {
             _service = service;
             _logger = logger;
+            _configuration = configuration;
+        }
+
+        /// <summary>
+        /// Autentica un usuario y genera un token JWT
+        /// </summary>
+        /// <param name="authType">Datos de autenticación del usuario</param>
+        /// <returns>Token JWT y datos del usuario</returns>
+        [HttpPost("login")]
+        [ProducesResponseType(typeof(AuthResponseType), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<AuthResponseType>> Login([FromBody] AuthType authType)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { Success = false, Message = "Datos de entrada inválidos", Errors = ModelState.Values.SelectMany(v => v.Errors) });
+                }
+
+                var usuario = await _service.ConsultarPorUsuarioYContrasenia(authType);
+
+                if (usuario == null)
+                {
+                    return Unauthorized(new { Success = false, Message = "Credenciales inválidas" });
+                }
+
+                var token = GenerarToken(usuario);
+
+                return Ok(new AuthResponseType
+                {
+                    Token = token,
+                    Correo = usuario.Correo,
+                    Nombre = usuario.Nombre,
+                    Rol = usuario.Rol_Descripcion
+                });
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error en la autenticación: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en la autenticación: {Message}", ex.Message);
+                return Unauthorized(new { Success = false, Message = "Error en la autenticación" });
+            }
+        }
+
+        private string GenerarToken(UsuarioType usuario)
+        {
+            var key = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(key) || key.Length < 32)
+            {
+                throw new InvalidOperationException("La clave JWT debe tener al menos 32 caracteres");
+            }
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new Claim(ClaimTypes.Email, usuario.Correo),
+                new Claim(ClaimTypes.Role, usuario.Rol_Descripcion)
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddHours(3),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         /// <summary>
@@ -40,6 +127,7 @@ namespace es_usuario.Controller.impl
         /// <response code="400">Datos de entrada inválidos</response>
         /// <response code="404">Catálogo no encontrado</response>
         /// <response code="500">Error interno del servidor</response>
+        [Authorize]
         [HttpPut]
         [ProducesResponseType(typeof(UsuarioType), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
@@ -154,6 +242,7 @@ namespace es_usuario.Controller.impl
         /// <response code="400">Datos de entrada inválidos</response>
         /// <response code="404">Catálogo no encontrado</response>
         /// <response code="500">Error interno del servidor</response>
+        [Authorize]
         [HttpDelete("{Id}")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
@@ -204,6 +293,7 @@ namespace es_usuario.Controller.impl
         /// <returns>Lista de catálogos.</returns>
         /// <response code="200">Listado de catálogos obtenido exitosamente</response>
         /// <response code="500">Error interno del servidor</response>
+        [Authorize]
         [HttpGet]
         [ProducesResponseType(typeof(List<UsuarioType>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
@@ -247,6 +337,7 @@ namespace es_usuario.Controller.impl
         /// <response code="200">Catálogo encontrado exitosamente</response>
         /// <response code="404">Catálogo no encontrado</response>
         /// <response code="500">Error interno del servidor</response>
+        [Authorize]
         [HttpGet("{Id}")]
         [ProducesResponseType(typeof(UsuarioType), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]

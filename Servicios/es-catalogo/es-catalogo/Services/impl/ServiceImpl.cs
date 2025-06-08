@@ -51,6 +51,32 @@ namespace es_catalogo.Services.impl
         }
 
         /// <summary>
+        /// Obtiene todos los registros de catálogos por el tipo.
+        /// </summary>
+        /// <param name="Tipo">Tipo de parametros.</param>
+        /// <returns>Lista de catálogos.</returns>
+        public async Task<List<CatalogoType>> ObtenerPorTipo(string Tipo)
+        {
+            const string operation = nameof(ObtenerPorTipo);
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+                var resultado = await _repository.ObtenerPorTipo(Tipo);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { Count = resultado.Count });
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Obtiene un catálogo específico por su identificador.
         /// </summary>
         /// <param name="id">Identificador del catálogo a consultar.</param>

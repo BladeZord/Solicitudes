@@ -40,5 +40,13 @@ namespace es_usuario.Repository.contract
         /// <param name="id">Identificador del registro a eliminar.</param>
         /// <returns>True si el registro fue eliminado exitosamente, false en caso contrario.</returns>
         Task<bool> Eliminar(int id);
+
+
+        /// <summary>
+        /// Compara si el usuario existe.
+        /// </summary>
+        /// <param name="AuthParam">Parametros de consulta.</param>
+        /// <returns>Entidad guardada con su usuario y contrañas.</returns>
+        Task<UsuarioType> ConsultarPorUsuarioYContrasenia(AuthType AuthParam);
     }
 } 

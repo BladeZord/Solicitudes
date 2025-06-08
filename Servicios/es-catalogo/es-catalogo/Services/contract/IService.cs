@@ -37,5 +37,13 @@ namespace es_catalogo.Services.contract
         /// <param name="id">Identificador del registro a eliminar.</param>
         /// <returns>Retorna mensaje acorde al resultado de la operación.</returns>
         Task<string> Eliminar(int id);
+
+        /// <summary>
+        /// Obtiene todos los registros de catálogos por el tipo.
+        /// </summary>
+        /// <param name="Tipo">Tipo de parametros.</param>
+
+        /// <returns>Lista de catálogos.</returns>
+        Task<List<CatalogoType>> ObtenerPorTipo(string Tipo);
     }
 }
