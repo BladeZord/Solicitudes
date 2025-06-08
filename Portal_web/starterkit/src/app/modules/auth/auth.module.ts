@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { LoginComponent } from './login/login.component';
 import { RegistroComponent } from './registro/registro.component';
 import { RouterModule, Routes } from '@angular/router';
+import { ToastrModule } from 'ngx-toastr';
+import { FormsModule } from '@angular/forms';
 
 const AUTH_ROUTES: Routes = [
   {
@@ -36,7 +38,8 @@ const AUTH_ROUTES: Routes = [
   imports: [
     CommonModule,
     RouterModule.forChild(AUTH_ROUTES),
-    
+    ToastrModule.forRoot(),
+    FormsModule
   ]
 })
 export class AuthModule { }

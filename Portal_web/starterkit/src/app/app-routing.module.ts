@@ -16,7 +16,7 @@ export const Approutes: Routes = [
     children: [
       {
         path: 'auth',
-        loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
+        loadChildren: () => import('./modules/auth/auth.module').then(m => m.AuthModule)
       }
     ]
   },

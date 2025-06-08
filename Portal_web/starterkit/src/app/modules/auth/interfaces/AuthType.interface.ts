@@ -8,4 +8,5 @@ export interface AuthResponseType {
 export interface AuthRequestType {
   correo: string;
   contrasenia: string;
+  perfil?: string;
 }

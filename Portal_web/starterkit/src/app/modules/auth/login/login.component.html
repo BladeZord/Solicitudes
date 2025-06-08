@@ -1,0 +1,60 @@
+<div class="row justify-content-center mt-5">
+  <div class="card col-md-3">
+    <div class="card-body">
+      <h2 class="text-center mb-4">Bienvenido al Sistema de Gestión de Crédito</h2>
+
+      <!-- Campo de correo -->
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input
+          id="correo"
+          type="email"
+          class="form-control"
+          [(ngModel)]="formulario.correo"
+          name="correo"
+          required
+        />
+      </div>
+
+      <!-- Campo de contraseña -->
+      <div class="mb-3">
+        <label for="contrasenia" class="form-label">Contraseña</label>
+        <input
+          id="contrasenia"
+          type="password"
+          class="form-control"
+          [(ngModel)]="formulario.contrasenia"
+          name="contrasenia"
+          required
+        />
+      </div>
+
+      <!-- Selector de perfil -->
+      <div class="mb-4">
+        <label for="perfil" class="form-label">Perfil</label>
+        <select
+          id="perfil"
+          class="form-select"
+          [(ngModel)]="formulario.perfil"
+          name="perfil"
+          required
+        >
+          <option value="" disabled selected>Seleccione su perfil</option>
+          <option *ngFor="let perfil of listTipoPersona" [value]="perfil.id">
+            {{ perfil.descripcion }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Botones -->
+      <div class="row">
+        <div class="col">
+          <button type="button" (click)="iniciarSesion()" class="btn btn-primary w-100">Ingresar</button>
+        </div>
+        <div class="col">
+          <button type="button" class="btn btn-secondary w-100">Registrarse</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
