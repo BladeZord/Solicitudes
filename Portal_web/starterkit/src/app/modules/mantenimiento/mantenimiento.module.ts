@@ -1,45 +1,44 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CatalogoComponent } from './pages/catalogo/catalogo.component';
-import { UsuarioComponent } from './pages/usuario/usuario.component';
-import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { CatalogoComponent } from "./pages/catalogo/catalogo.component";
+import { UsuarioComponent } from "./pages/usuario/usuario.component";
+import { RouterModule, Routes } from "@angular/router";
+import { FormsModule } from "@angular/forms";
+import { NgbPaginationModule } from "@ng-bootstrap/ng-bootstrap";
 
 const MANTENIMIENTO_ROUTES: Routes = [
   {
-    path: 'catalogo',
+    path: "catalogo",
     data: {
-      title: 'Catalogo',
+      title: "Catalogo",
       urls: [
-        { title: 'Mantenimiento', url: '/catalogo' },
-        { title: 'Catalogo', url: '/catalogo' },
-      ]
+        { title: "Mantenimiento", url: "/catalogo" },
+        { title: "Catalogo", url: "/catalogo" },
+      ],
     },
-    component: CatalogoComponent
+    component: CatalogoComponent,
   },
   {
-    path: 'usuario',
+    path: "usuario",
     data: {
-      title: 'Usuario',
+      title: "Usuario",
       urls: [
-        { title: 'Mantenimiento', url: '/catalogo' },
+        { title: "Mantenimiento", url: "/catalogo" },
 
-        { title: 'Usuario', url: '/usuario' },
-      ]
+        { title: "Usuario", url: "/usuario" },
+      ],
     },
-    component: UsuarioComponent
+    component: UsuarioComponent,
   },
-]
-
+];
 
 @NgModule({
-  declarations: [
-    CatalogoComponent,
-    UsuarioComponent
-  ],
+  declarations: [CatalogoComponent, UsuarioComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(MANTENIMIENTO_ROUTES),
-
-  ]
+    FormsModule,
+    NgbPaginationModule
+  ],
 })
-export class MantenimientoModule { }
+export class MantenimientoModule {}

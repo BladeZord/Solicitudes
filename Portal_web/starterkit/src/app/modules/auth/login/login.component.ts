@@ -17,7 +17,7 @@ import { LogicaComunService } from "../../mantenimiento/services/logica-comun.se
 export class LoginComponent implements OnInit {
   formulario: AuthRequestType;
   listTipoPersona: CatalogoType[];
-  bandera: boolean = true;
+  bandera: boolean = false;
   contrasenia2: string = "";
   mostrarPasswordLogin: boolean = false;
   mostrarPasswordRegistro: boolean = false;
@@ -33,10 +33,12 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.bandera = false; // En caso que su valor este en true
     this.ObtenerTipoPersona();
     this.reiniciarFormulario();
     this.reiniciarFormularioRegistro();
   }
+
   reiniciarFormulario() {
     this.formulario = {
       contrasenia: "",
@@ -95,6 +97,7 @@ export class LoginComponent implements OnInit {
       },
     });
   }
+  
   ObtenerTipoPersona() {
     this._catalogoService.obtenerCatalogosPorTipo("TIPO_PERSONA").subscribe({
       next: (response) => {
@@ -146,7 +149,7 @@ export class LoginComponent implements OnInit {
           "Usuario registrado exitosamente"
         );
         this.bandera = false;
-        this.reiniciarFormularioRegistro();
+    this.reiniciarFormularioRegistro();
       },
       error: (err: HttpErrorResponse) => {
         console.error(err);
