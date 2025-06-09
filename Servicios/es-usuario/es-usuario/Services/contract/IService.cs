@@ -44,5 +44,10 @@ namespace es_usuario.Services.contract
         /// <param name="id">Identificador del registro a eliminar.</param>
         /// <returns>Retorna mensaje acorde al resultado de la operación.</returns>
         Task<string> Eliminar(int id);
+
+        // Nuevos métodos para Usuario_Roles
+        Task<List<UsuarioRolType>> ObtenerRolesPorUsuario(int usuarioId);
+        Task<bool> AsignarRolAUsuario(UsuarioRolType usuarioRol);
+        Task<bool> QuitarRolDeUsuario(UsuarioRolType usuarioRol);
     }
 }

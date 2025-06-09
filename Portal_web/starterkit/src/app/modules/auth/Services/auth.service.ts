@@ -10,16 +10,17 @@ import { Router } from '@angular/router';
 export class AuthService {
   private apiUrl = 'https://localhost:7271/v1/es/usuario/login'
 
-  constructor(private _http: HttpClient, private _router:Router) { }
+  constructor(private _http: HttpClient, private _router: Router) { }
 
   login(request: AuthRequestType): Observable<AuthResponseType> {
     return this._http.post<AuthResponseType>(this.apiUrl, request);
   }
 
-  logout(){
-    const usuario = localStorage.getItem('usuario')
-    if (!usuario){
-      
+  logout() {
+    const usuario = localStorage.getItem('usuario');
+    if (!usuario || usuario.trim() === '') {
+      console.warn('No hay usuario para cerrar sesión')
+      return;
     }
     localStorage.removeItem('usuario');
     this._router.navigate(['/auth/login'])

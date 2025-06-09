@@ -47,19 +47,44 @@ namespace es_usuario.Repository.impl
             try
             {
                 var sql = @"
-                             SELECT 
-                                   u.Id,
-                                   u.Nombre,
-                                   u.Correo,
-                                   u.Rol_Id,
-                                   c.Descripcion AS Rol_Descripcion
-                             FROM Usuarios u
-                             INNER JOIN catalogos c ON c.id = u.Rol_Id 
-                             WHERE c.Tipo = 'TIPO_PERSONA' AND u.Id = @Id";
+                    SELECT 
+                        u.Id,
+                        u.Nombre,
+                        u.Apellidos,
+                        u.Correo,
+                        u.Domicilio,
+                        u.Telefono,
+                        r.Id as RolId,
+                        r.Descripcion as RolDescripcion
+                    FROM Usuarios u
+                    LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
+                    LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
+                    WHERE u.Id = @Id";
+
+                var usuarioDict = new Dictionary<int, UsuarioType>();
+                
+                await connection.QueryAsync<UsuarioType, RolType, UsuarioType>(
+                    sql,
+                    (usuario, rol) =>
+                    {
+                        if (!usuarioDict.TryGetValue(usuario.Id, out var usuarioEntry))
+                        {
+                            usuarioEntry = usuario;
+                            usuarioEntry.Roles = new List<RolType>();
+                            usuarioDict.Add(usuario.Id, usuarioEntry);
+                        }
+                        if (rol != null)
+                        {
+                            usuarioEntry.Roles.Add(rol);
+                        }
+                        return usuarioEntry;
+                    },
+                    new { Id = id },
+                    splitOn: "RolId"
+                );
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
-
-                return await connection.QueryFirstOrDefaultAsync<UsuarioType>(sql, new { Id = id });
+                return usuarioDict.Values.FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -82,20 +107,43 @@ namespace es_usuario.Repository.impl
                 var connection = await _dbConexion.ObtenerConexion();
 
                 var sql = @"
-                             SELECT 
-                                   u.Id,
-                                   u.Nombre,
-                                   u.Correo,
-                                   u.Rol_Id,
-                                   c.Descripcion AS Rol_Descripcion
-                             FROM Usuarios u
-                             INNER JOIN catalogos c ON c.id = u.Rol_Id WHERE c.Tipo = 'TIPO_PERSONA'
-                             ORDER BY u.Nombre";
+                    SELECT 
+                        u.Id,
+                        u.Nombre,
+                        u.Apellidos,
+                        u.Correo,
+                        u.Domicilio,
+                        u.Telefono,
+                        r.Id as RolId,
+                        r.Descripcion as RolDescripcion
+                    FROM Usuarios u
+                    LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
+                    LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
+                    ORDER BY u.Nombre";
 
-                var result = (await connection.QueryAsync<UsuarioType>(sql)).ToList();
+                var usuarioDict = new Dictionary<int, UsuarioType>();
+                
+                await connection.QueryAsync<UsuarioType, RolType, UsuarioType>(
+                    sql,
+                    (usuario, rol) =>
+                    {
+                        if (!usuarioDict.TryGetValue(usuario.Id, out var usuarioEntry))
+                        {
+                            usuarioEntry = usuario;
+                            usuarioEntry.Roles = new List<RolType>();
+                            usuarioDict.Add(usuario.Id, usuarioEntry);
+                        }
+                        if (rol != null)
+                        {
+                            usuarioEntry.Roles.Add(rol);
+                        }
+                        return usuarioEntry;
+                    },
+                    splitOn: "RolId"
+                );
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
-                return result;
+                return usuarioDict.Values.ToList();
             }
             catch (Exception ex)
             {
@@ -141,8 +189,7 @@ namespace es_usuario.Repository.impl
             using var scope = _logger.BeginScope(new Dictionary<string, object>
             {
                 ["nombre"] = entityType.Nombre,
-                ["correo"] = entityType.Correo,
-                ["rol_id"] = entityType.Rol_Id
+                ["correo"] = entityType.Correo
             });
 
             try
@@ -154,16 +201,20 @@ namespace es_usuario.Repository.impl
                     INSERT INTO Usuarios 
                     (
                         Nombre,
+                        Apellidos,
                         Correo,
-                        Rol_Id, 
-                        Contrasenia
+                        Contrasenia,
+                        Domicilio,
+                        Telefono
                     )
                     VALUES 
                     (
                         @Nombre,
+                        @Apellidos,
                         @Correo,
-                        @Rol_Id,
-                        @Contrasenia
+                        @Contrasenia,
+                        @Domicilio,
+                        @Telefono
                     );
                     SELECT SCOPE_IDENTITY();";
 
@@ -191,23 +242,26 @@ namespace es_usuario.Repository.impl
             using var scope = _logger.BeginScope(new Dictionary<string, object>
             {
                 ["nombre"] = entityType.Nombre,
-                ["correo"] = entityType.Correo,
-                ["rol_id"] = entityType.Rol_Id
+                ["correo"] = entityType.Correo
             });
             _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
             try
             {
                 var connection = await _dbConexion.ObtenerConexion();
+                using var transaction = connection.BeginTransaction();
 
                 var sql = @"
                     UPDATE Usuarios
                     SET Nombre = @Nombre,
+                        Apellidos = @Apellidos,
                         Correo = @Correo,
                         Contrasenia = @Contrasenia,
-                        Rol_Id = @Rol_Id
+                        Domicilio = @Domicilio,
+                        Telefono = @Telefono
                     WHERE Id = @Id";
 
-                await connection.ExecuteAsync(sql, entityType);
+                await connection.ExecuteAsync(sql, entityType, transaction);
+                transaction.Commit();
                 return await ObtenerPorIdDesdeConexion(entityType.Id, connection);
             }
             catch (Exception ex)
@@ -245,7 +299,6 @@ namespace es_usuario.Repository.impl
             }
         }
 
-
         /// <summary>
         /// Compara si el usuario existe.
         /// </summary>
@@ -261,28 +314,116 @@ namespace es_usuario.Repository.impl
                 var connection = await _dbConexion.ObtenerConexion();
 
                 var sql = @"
-                             SELECT 
-                                   u.Id,
-                                   u.Nombre,
-                                   u.Correo,
-                                   u.Rol_Id,
-                                   u.Contrasenia,
-                                   c.Descripcion AS Rol_Descripcion
-                             FROM Usuarios u
-                             INNER JOIN catalogos c ON c.id = u.Rol_Id 
-                             WHERE 
-                                c.Tipo = 'TIPO_PERSONA' AND
-                                u.Correo = @Correo AND
-                                u.Contrasenia = @Contrasenia
-                             ";
+                    SELECT 
+                        u.Id,
+                        u.Nombre,
+                        u.Apellidos,
+                        u.Correo,
+                        u.Contrasenia,
+                        u.Domicilio,
+                        u.Telefono,
+                        r.Id as RolId,
+                        r.Descripcion as RolDescripcion
+                    FROM Usuarios u
+                    LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
+                    LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
+                    WHERE u.Correo = @Correo AND u.Contrasenia = @Contrasenia";
+
+                var usuarioDict = new Dictionary<int, UsuarioType>();
+                
+                await connection.QueryAsync<UsuarioType, RolType, UsuarioType>(
+                    sql,
+                    (usuario, rol) =>
+                    {
+                        if (!usuarioDict.TryGetValue(usuario.Id, out var usuarioEntry))
+                        {
+                            usuarioEntry = usuario;
+                            usuarioEntry.Nombre = $"{usuario.Nombre} {usuario.Apellidos}".Trim();
+                            usuarioEntry.Roles = new List<RolType>();
+                            usuarioDict.Add(usuario.Id, usuarioEntry);
+                        }
+                        if (rol != null)
+                        {
+                            usuarioEntry.Roles.Add(rol);
+                        }
+                        return usuarioEntry;
+                    },
+                    new { Correo = AuthParam.Correo, Contrasenia = AuthParam.Contrasenia },
+                    splitOn: "RolId"
+                );
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
-                return await connection.QueryFirstOrDefaultAsync<UsuarioType>(sql,
-                                                            new
-                                                            {
-                                                                Correo = AuthParam.Correo,
-                                                                Contrasenia = AuthParam.Contrasenia
-                                                            });
+                return usuarioDict.Values.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        // Nuevos métodos para Usuario_Roles
+        public async Task<List<UsuarioRolType>> ObtenerRolesPorUsuario(int usuarioId)
+        {
+            const string operation = nameof(ObtenerRolesPorUsuario);
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+                var sql = "SELECT Usuario_Id, Rol_Id FROM Usuario_Roles WHERE Usuario_Id = @UsuarioId";
+                var result = (await connection.QueryAsync<UsuarioRolType>(sql, new { UsuarioId = usuarioId })).ToList();
+                
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<bool> AsignarRolAUsuario(UsuarioRolType usuarioRol)
+        {
+            const string operation = nameof(AsignarRolAUsuario);
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+                var sql = @"
+                    INSERT INTO Usuario_Roles (Usuario_Id, Rol_Id)
+                    VALUES (@Usuario_Id, @Rol_Id)";
+                
+                var result = await connection.ExecuteAsync(sql, usuarioRol);
+                
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<bool> QuitarRolDeUsuario(UsuarioRolType usuarioRol)
+        {
+            const string operation = nameof(QuitarRolDeUsuario);
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+                var sql = @"
+                    DELETE FROM Usuario_Roles 
+                    WHERE Usuario_Id = @Usuario_Id AND Rol_Id = @Rol_Id";
+                
+                var result = await connection.ExecuteAsync(sql, usuarioRol);
+                
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return result > 0;
             }
             catch (Exception ex)
             {

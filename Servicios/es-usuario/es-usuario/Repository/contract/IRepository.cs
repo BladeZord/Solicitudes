@@ -48,5 +48,10 @@ namespace es_usuario.Repository.contract
         /// <param name="AuthParam">Parametros de consulta.</param>
         /// <returns>Entidad guardada con su usuario y contrañas.</returns>
         Task<UsuarioType> ConsultarPorUsuarioYContrasenia(AuthType AuthParam);
+
+        // Nuevos métodos para Usuario_Roles
+        Task<List<UsuarioRolType>> ObtenerRolesPorUsuario(int usuarioId);
+        Task<bool> AsignarRolAUsuario(UsuarioRolType usuarioRol);
+        Task<bool> QuitarRolDeUsuario(UsuarioRolType usuarioRol);
     }
 } 

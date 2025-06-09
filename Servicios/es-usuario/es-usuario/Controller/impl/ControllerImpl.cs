@@ -74,18 +74,18 @@ namespace es_usuario.Controller.impl
                     Token = token,
                     Correo = usuario.Correo,
                     Nombre = usuario.Nombre,
-                    Rol = usuario.Rol_Descripcion
+                    Roles = usuario.Roles.Select(r => r.Descripcion).ToList()
                 });
             }
             catch (ServiceException ex)
             {
-                _logger.LogError(ex, "Error en la autenticación: {Message}", ex.Message);
+                _logger.LogError(ex, "Error de validación en la autenticación: {Message}", ex.Message);
                 return BadRequest(new { Success = false, Message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en la autenticación: {Message}", ex.Message);
-                return Unauthorized(new { Success = false, Message = "Error en la autenticación" });
+                _logger.LogError(ex, "Error interno en la autenticación: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
             }
         }
 
@@ -100,12 +100,17 @@ namespace es_usuario.Controller.impl
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                new Claim(ClaimTypes.Email, usuario.Correo),
-                new Claim(ClaimTypes.Role, usuario.Rol_Descripcion)
+                new Claim(ClaimTypes.Email, usuario.Correo)
             };
+
+            // Agregar cada rol como un claim separado
+            foreach (var rol in usuario.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, rol.Descripcion));
+            }
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
@@ -165,15 +170,15 @@ namespace es_usuario.Controller.impl
 
                 return Ok(result);
             }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al actualizar: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    ApiConstants.LogMessages.OperationError,
-                    "Actualizar",
-                    ex.Message
-                );
-                throw;
+                _logger.LogError(ex, "Error interno al actualizar: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
             }
         }
 
@@ -221,15 +226,15 @@ namespace es_usuario.Controller.impl
 
                 return StatusCode(StatusCodes.Status201Created, result);
             }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al guardar: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    ApiConstants.LogMessages.OperationError,
-                    "Guardar",
-                    ex.Message
-                );
-                throw;
+                _logger.LogError(ex, "Error interno al guardar: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
             }
         }
 
@@ -275,15 +280,15 @@ namespace es_usuario.Controller.impl
 
                 return Ok(new { Success = true, Message = result });
             }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al eliminar: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    ApiConstants.LogMessages.OperationError,
-                    "Eliminar",
-                    ex.Message
-                );
-                throw;
+                _logger.LogError(ex, "Error interno al eliminar: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
             }
         }
 
@@ -317,15 +322,15 @@ namespace es_usuario.Controller.impl
 
                 return Ok(result);
             }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al obtener listado: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    ApiConstants.LogMessages.OperationError,
-                    "ObtenerListado",
-                    ex.Message
-                );
-                throw;
+                _logger.LogError(ex, "Error interno al obtener listado: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
             }
         }
 
@@ -375,15 +380,147 @@ namespace es_usuario.Controller.impl
 
                 return Ok(result);
             }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al obtener por ID: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    ApiConstants.LogMessages.OperationError,
-                    "ObtenerPorId",
-                    ex.Message
+                _logger.LogError(ex, "Error interno al obtener por ID: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los roles de un usuario específico.
+        /// </summary>
+        /// <param name="usuarioId">Identificador del usuario.</param>
+        /// <returns>Lista de roles del usuario.</returns>
+        [Authorize]
+        [HttpGet("roles/{usuarioId}")]
+        [ProducesResponseType(typeof(List<UsuarioRolType>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> ObtenerRolesPorUsuario(int usuarioId)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "ObtenerRolesPorUsuario",
+                    usuarioId
                 );
-                throw;
+
+                var result = await _service.ObtenerRolesPorUsuario(usuarioId);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "ObtenerRolesPorUsuario",
+                    usuarioId,
+                    "Success"
+                );
+
+                return Ok(result);
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al obtener roles: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error interno al obtener roles: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Asigna un rol a un usuario.
+        /// </summary>
+        /// <param name="usuarioRol">Relación usuario-rol a crear.</param>
+        /// <returns>Resultado de la operación.</returns>
+        [Authorize]
+        [HttpPost("roles")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> AsignarRolAUsuario([FromBody] UsuarioRolType usuarioRol)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "AsignarRolAUsuario",
+                    new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id }
+                );
+
+                var result = await _service.AsignarRolAUsuario(usuarioRol);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "AsignarRolAUsuario",
+                    new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id },
+                    "Success"
+                );
+
+                return Ok(new { Success = result });
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al asignar rol: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error interno al asignar rol: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Quita un rol de un usuario.
+        /// </summary>
+        /// <param name="usuarioRol">Relación usuario-rol a eliminar.</param>
+        /// <returns>Resultado de la operación.</returns>
+        [Authorize]
+        [HttpDelete("roles")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> QuitarRolDeUsuario([FromBody] UsuarioRolType usuarioRol)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "QuitarRolDeUsuario",
+                    new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id }
+                );
+
+                var result = await _service.QuitarRolDeUsuario(usuarioRol);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "QuitarRolDeUsuario",
+                    new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id },
+                    "Success"
+                );
+
+                return Ok(new { Success = result });
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al quitar rol: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error interno al quitar rol: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
             }
         }
     }

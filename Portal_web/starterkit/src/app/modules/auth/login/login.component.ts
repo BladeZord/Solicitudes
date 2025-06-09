@@ -2,19 +2,12 @@ import { Component, OnInit } from "@angular/core";
 import { AuthService } from "../Services/auth.service";
 import { CatalogoService } from "../../mantenimiento/services/catalogo.service";
 import { AuthRequestType } from "../interfaces/AuthType.interface";
-import { ToastrService } from "ngx-toastr";
 import { HttpErrorResponse } from "@angular/common/http";
 import { CatalogoType } from "../../mantenimiento/interfaces/catalogo.interface";
 import { Router } from "@angular/router";
-/**
- *{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJrZXZpbi5xdWl0b0B1bmlkYWRuZWdvY2lvLmNvbS5lYyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFuYWxpc3RhIGRlIHJldmlzaW9uIiwiZXhwIjoxNzQ5NDEzODQ2LCJpc3MiOiJlcy11c3VhcmlvIiwiYXVkIjoiZXMtdXN1YXJpby1jbGllbnQifQ._58qiihOWINPpuyDs-PbRfw0WQIfeVDzWixm-zoxd3o",
-  "correo": "kevin.quito@unidadnegocio.com.ec",
-  "nombre": "Kevin Quito",
-  "rol": "Analista de revision"
-}
- * 
- */
+import { UsuarioType } from "../../mantenimiento/interfaces/usuario.inteface";
+import { UsuarioService } from "../../mantenimiento/services/usuario.service";
+import { LogicaComunService } from "../../mantenimiento/services/logica-comun.service";
 
 @Component({
   selector: "app-login",
@@ -24,19 +17,49 @@ import { Router } from "@angular/router";
 export class LoginComponent implements OnInit {
   formulario: AuthRequestType;
   listTipoPersona: CatalogoType[];
+  bandera: boolean = true;
+  contrasenia2: string = "";
+  mostrarPasswordLogin: boolean = false;
+  mostrarPasswordRegistro: boolean = false;
+  mostrarPasswordRepetir: boolean = false;
+  formularioRegistro: UsuarioType;
+
   constructor(
     private _loginService: AuthService,
     private _catalogoService: CatalogoService,
-    private _toastr: ToastrService,
-    private _router: Router
+    private _router: Router,
+    private _usuarioService: UsuarioService,
+    private _utilService: LogicaComunService
   ) {}
 
   ngOnInit(): void {
     this.ObtenerTipoPersona();
+    this.reiniciarFormulario();
+    this.reiniciarFormularioRegistro();
+  }
+  reiniciarFormulario() {
     this.formulario = {
       contrasenia: "",
       correo: "",
       perfil: "",
+    };
+  }
+
+  reiniciarFormularioRegistro() {
+    this.formularioRegistro = {
+      id: 0,
+      nombre: "",
+      apellidos: "",
+      correo: "",
+      contrasenia: "",
+      domicilio: "",
+      telefono: "",
+      roles: [
+        {
+          id: 0,
+          descripcion: "",
+        },
+      ],
     };
   }
 
@@ -47,22 +70,28 @@ export class LoginComponent implements OnInit {
       !this.formulario.contrasenia ||
       this.formulario.contrasenia.trim() === ""
     ) {
-      this._toastr.warning("Complete los campos", "Aviso");
+      this._utilService.mostrarMensaje("warning", "Complete los campos");
       return;
     }
 
     this._loginService.login(this.formulario).subscribe({
       next: (response) => {
         if (!response) {
-          this._toastr.warning("Inicio de sesión fallido", "Aviso");
+          this._utilService.mostrarMensaje(
+            "warning",
+            "Inicio de sesión fallido"
+          );
+
           return;
         }
-        this._toastr.success("Inicio de sesión exitoso", "Aviso");
+        this._utilService.mostrarMensaje("success", "Inicio de sesión exitoso");
+
         localStorage.setItem("usuario", JSON.stringify(response));
         this._router.navigate(["/starter"]);
-      }, error: (err: HttpErrorResponse) => {
+      },
+      error: (err: HttpErrorResponse) => {
         console.error(err);
-        this._toastr.error(err.error.message, "Error");
+        this._utilService.mostrarMensaje("error", err.error);
       },
     });
   }
@@ -73,8 +102,61 @@ export class LoginComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         console.error(err);
-        this._toastr.error(err.error.message, "Error");
+        this._utilService.mostrarMensaje("error", err.error);
       },
     });
+  }
+
+  mostarFormularioRegistro() {
+    this.bandera = true;
+    this.reiniciarFormularioRegistro();
+  }
+
+  guardarRegistro() {
+    const camposRequeridos = [
+      this.formularioRegistro.nombre,
+      this.formularioRegistro.apellidos,
+      this.formularioRegistro.domicilio,
+      this.formularioRegistro.telefono,
+      this.formularioRegistro.correo,
+      this.formularioRegistro.contrasenia,
+    ];
+
+    const camposValidos = camposRequeridos.every((campo) =>
+      this._utilService.isInputValido(campo)
+    );
+
+    if (!camposValidos) {
+      this._utilService.mostrarMensaje("warning", "Complete los campos");
+      return;
+    }
+
+    if (this.formularioRegistro.contrasenia !== this.contrasenia2) {
+      this._utilService.mostrarMensaje(
+        "warning",
+        "Las contraseñas no coinciden"
+      );
+      return;
+    }
+
+    this._usuarioService.crearUsuario(this.formularioRegistro).subscribe({
+      next: () => {
+        this._utilService.mostrarMensaje(
+          "success",
+          "Usuario registrado exitosamente"
+        );
+        this.bandera = false;
+        this.reiniciarFormularioRegistro();
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error(err);
+        this._utilService.mostrarMensaje("error", err.error);
+      },
+    });
+  }
+
+  cancelarRegistro() {
+    this.bandera = false;
+    this.reiniciarFormularioRegistro();
   }
 }

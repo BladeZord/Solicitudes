@@ -22,6 +22,13 @@ namespace es_usuario.Controller.type
         public string Nombre { get; set; } = string.Empty;
 
         /// <summary>
+        /// Apellidos del usuario.
+        /// </summary>
+        [Required]
+        [StringLength(200)]
+        public string Apellidos { get; set; } = string.Empty;
+
+        /// <summary>
         /// Correo del usuario.
         /// </summary>
         [Required]
@@ -36,14 +43,53 @@ namespace es_usuario.Controller.type
         public string Contrasenia { get; set; } = string.Empty;
 
         /// <summary>
-        /// Codigo del rol que cumple en el catalogo.
+        /// Domicilio del usuario.
         /// </summary>
-        public int? Rol_Id { get; set; } = 0;
+        [StringLength(500)]
+        public string? Domicilio { get; set; }
 
         /// <summary>
-        /// Descripcion del rol.
+        /// Teléfono del usuario.
+        /// </summary>
+        [StringLength(20)]
+        public string? Telefono { get; set; }
+
+        /// <summary>
+        /// Lista de roles del usuario.
         /// </summary>
         [NotMapped]
-        public string? Rol_Descripcion { get; set; } = string.Empty;
+        public List<RolType> Roles { get; set; } = new List<RolType>();
+    }
+
+    /// <summary>
+    /// Representa un rol de usuario.
+    /// </summary>
+    public class RolType
+    {
+        /// <summary>
+        /// Identificador del rol.
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Descripción del rol.
+        /// </summary>
+        public string Descripcion { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Representa la relación entre usuario y rol.
+    /// </summary>
+    public class UsuarioRolType
+    {
+        /// <summary>
+        /// Identificador del usuario.
+        /// </summary>
+        public int Usuario_Id { get; set; }
+
+        /// <summary>
+        /// Identificador del rol.
+        /// </summary>
+        public int Rol_Id { get; set; }
     }
 } 

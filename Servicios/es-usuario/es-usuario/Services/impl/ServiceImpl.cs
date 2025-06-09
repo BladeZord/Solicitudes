@@ -151,7 +151,7 @@ namespace es_usuario.Services.impl
             catch (Exception ex)
             {
                 _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
-                throw new ServiceException($"Error al guardar el catálogo: {ex.Message}");
+                throw new ServiceException($"Error al guardar el usuario: {ex.Message}");
             }
         }
 
@@ -182,7 +182,7 @@ namespace es_usuario.Services.impl
             catch (Exception ex)
             {
                 _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
-                throw new ServiceException($"Error al actualizar el catálogo: {ex.Message}");
+                throw new ServiceException($"Error al actualizar el usuario: {ex.Message}");
             }
         }
 
@@ -216,6 +216,70 @@ namespace es_usuario.Services.impl
             {
                 _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
                 throw new ServiceException($"Error al eliminar el catálogo: {ex.Message}");
+            }
+        }
+
+        // Nuevos métodos para Usuario_Roles
+        public async Task<List<UsuarioRolType>> ObtenerRolesPorUsuario(int usuarioId)
+        {
+            const string operation = nameof(ObtenerRolesPorUsuario);
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation, new { usuarioId });
+
+                var resultado = await _repository.ObtenerRolesPorUsuario(usuarioId);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { usuarioId, Count = resultado.Count });
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al obtener roles del usuario: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> AsignarRolAUsuario(UsuarioRolType usuarioRol)
+        {
+            const string operation = nameof(AsignarRolAUsuario);
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation, new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id });
+
+                var resultado = await _repository.AsignarRolAUsuario(usuarioRol);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id, Status = resultado });
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al asignar rol al usuario: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> QuitarRolDeUsuario(UsuarioRolType usuarioRol)
+        {
+            const string operation = nameof(QuitarRolDeUsuario);
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation, new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id });
+
+                var resultado = await _repository.QuitarRolDeUsuario(usuarioRol);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id, Status = resultado });
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al quitar rol del usuario: {ex.Message}");
             }
         }
     }
