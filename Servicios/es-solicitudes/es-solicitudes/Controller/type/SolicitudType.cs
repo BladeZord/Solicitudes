@@ -15,6 +15,11 @@ namespace es_solicitudes.Controller.type
         public int Id { get; set; }
 
         /// <summary>
+        /// Código único de la solicitud generado por el sistema.
+        /// </summary>
+        public string? Codigo { get; set; }
+
+        /// <summary>
         /// Monto de la solicitud.
         /// </summary>
         [Required]

@@ -163,8 +163,17 @@ export class CatalogoComponent implements OnInit, OnDestroy {
   }
 
   editarRegistro(content: any, catalogo: CatalogoType): void {
-    this.formulario = { ...catalogo };
-    this.abrirModal(content);
+    console.log('Catálogo recibido para edición:', catalogo);
+    this.formulario.id = catalogo.id;
+    this.formulario.codigo = catalogo.codigo;
+    this.formulario.descripcion = catalogo.descripcion;
+    this.formulario.padre_Id = catalogo.padre_Id || 0;
+    this.formulario.tipo = catalogo.tipo || '';
+    console.log('Formulario después de asignación explícita:', this.formulario);
+
+    setTimeout(() => {
+      this.abrirModal(content);
+    }, 0);
   }
 
   guardarRegistro(): void {

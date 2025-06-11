@@ -78,10 +78,13 @@ export class VerticalSidebarComponent {
     } else {
       this.showSubMenu = element;
     }
-    window.scroll({
-      top: 0,
-      left: 0,
-      behavior: "smooth",
-    });
+  }
+
+  isMenuActive(menu: RouteInfo): boolean {
+    return this.showMenu === menu.title;
+  }
+
+  isSubMenuActive(submenu: RouteInfo): boolean {
+    return this.showSubMenu === submenu.title;
   }
 }

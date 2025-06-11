@@ -208,5 +208,92 @@ namespace es_solicitudes.Services.impl
                 throw new ServiceException($"Error al cambiar el estado de la solicitud: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Obtiene las solicitudes por ID de usuario.
+        /// </summary>
+        /// <param name="usuarioId">ID del usuario.</param>
+        /// <returns>Lista de solicitudes del usuario.</returns>
+        public async Task<List<SolicitudType>> ObtenerPorUsuarioId(int usuarioId)
+        {
+            const string operation = nameof(ObtenerPorUsuarioId);
+            using var scope = _logger.BeginScope(new Dictionary<string, object> { ["usuarioId"] = usuarioId });
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+                var resultado = await _repository.ObtenerPorUsuarioId(usuarioId);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { Count = resultado.Count });
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al obtener las solicitudes del usuario: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las solicitudes por ID de estado.
+        /// </summary>
+        /// <param name="estadoId">ID del estado.</param>
+        /// <returns>Lista de solicitudes con el estado especificado.</returns>
+        public async Task<List<SolicitudType>> ObtenerPorEstadoId(int estadoId)
+        {
+            const string operation = nameof(ObtenerPorEstadoId);
+            using var scope = _logger.BeginScope(new Dictionary<string, object> { ["estadoId"] = estadoId });
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+                var resultado = await _repository.ObtenerPorEstadoId(estadoId);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { Count = resultado.Count });
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al obtener las solicitudes por estado: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las solicitudes por filtros dinámicos.
+        /// </summary>
+        /// <param name="filtros">Filtros de búsqueda.</param>
+        /// <returns>Lista de solicitudes que cumplen con los filtros.</returns>
+        public async Task<List<SolicitudType>> ObtenerPorFiltros(FiltrosSolicitudType filtros)
+        {
+            const string operation = nameof(ObtenerPorFiltros);
+            using var scope = _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["usuarioId"] = filtros.UsuarioId,
+                ["estadoId"] = filtros.EstadoId,
+                ["fechaInicio"] = filtros.FechaInicio,
+                ["fechaFin"] = filtros.FechaFin
+            });
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+                var resultado = await _repository.ObtenerPorFiltros(filtros);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { Count = resultado.Count });
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al obtener las solicitudes por filtros: {ex.Message}");
+            }
+        }
     }
 }

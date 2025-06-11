@@ -1,85 +1,78 @@
-import { RouteInfo } from './vertical-sidebar.metadata';
+import { RouteInfo } from "./vertical-sidebar.metadata";
 
 export const ROUTES: RouteInfo[] = [
+
   {
-    path: '',
-    title: 'Mantenimiento',
-    icon: 'mdi mdi-dots-horizontal',
-    class: 'nav-small-cap',
-    extralink: true,
-    label: '',
-    labelClass: '',
-    submenu: []
-  },
-  {
-    path: '/starter',
-    title: 'Starter Page',
-    icon: 'icon-speedometer',
-    class: '',
+    path: "",
+    title: "Mantenimiento",
+    icon: "icon-speedometer",
+    class: "has-arrow",
     extralink: false,
-    label: '',
-    labelClass: '',
-    submenu: []
+    label: "",
+    labelClass: "",
+    submenu: [
+      {
+        path: "/mantenimiento/catalogo",
+        title: "Catalogos",
+        icon: "icon-book-open",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+      {
+        path: "/mantenimiento/usuario",
+        title: "Usuarios",
+        icon: "icon-book-open",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+    ],
   },
   {
-    path: '/mantenimiento/usuario',
-    title: 'Usuarios',
-    icon: 'icon-user',
-    class: '',
+    path: "",
+    title: "Solicitudes",
+    icon: "icon-note",
+    class: "has-arrow",
     extralink: false,
-    label: '',
-    labelClass: '',
-    submenu: []
-  },
-  {
-    path: '/mantenimiento/catalogo',
-    title: 'Catalogos',
-    icon: 'icon-book-open',
-    class: '',
-    extralink: false,
-    label: '',
-    labelClass: '',
-    submenu: []
-  },
-  {
-    path: '',
-    title: 'Gestión de solicitudes',
-    icon: 'mdi mdi-dots-horizontal',
-    class: 'nav-small-cap',
-    extralink: true,
-    label: '',
-    labelClass: '',
-    submenu: []
-  },
-  {
-    path: '/solicitudes/registro',
-    title: 'Mis solicitudes',
-    icon: 'icon-note',
-    class: '',
-    extralink: false,
-    label: '',
-    labelClass: '',
-    submenu: []
-  },
-  {
-    path: '/solicitudes/consulta',
-    title: 'Consulta',
-    icon: 'icon-magnifier',
-    class: '',
-    extralink: false,
-    label: '',
-    labelClass: '',
-    submenu: []
-  },
-  {
-    path: '/solicitudes/auditoria',
-    title: 'Auditoría',
-    icon: 'icon-log',
-    class: '',
-    extralink: false,
-    label: '',
-    labelClass: '',
-    submenu: []
+    label: "",
+    labelClass: "",
+    submenu: [
+      {
+        path: "/solicitudes/solicitud",
+        title: "Mis solicitudes",
+        icon: "icon-note",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+      {
+        path: "/solicitudes/consulta",
+        title: "Consulta",
+        icon: "icon-magnifier",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+      {
+        path: "/solicitudes/auditoria",
+        title: "Auditoría",
+        icon: "icon-log",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+    ],
   },
   // {
   //   path: '',

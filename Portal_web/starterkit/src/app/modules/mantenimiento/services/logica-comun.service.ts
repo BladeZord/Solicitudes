@@ -2,6 +2,8 @@ import { Injectable } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 type ToastType = "success" | "error" | "info" | "warning";
 
 @Injectable({
@@ -78,5 +80,108 @@ export class LogicaComunService {
       type: "application/octet-stream",
     });
     FileSaver.saveAs(dataBlob, fileName);
+  }
+
+  exportarPDF(nombre: string, titulos: string[], data: any[]): void {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const startX = margin;
+    let startY = margin;
+
+    // Configuración de estilos
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(31, 78, 120); // Color azul oscuro
+
+    // Título del reporte
+    const titulo = nombre.toUpperCase();
+    const tituloWidth = doc.getTextWidth(titulo);
+    doc.text(titulo, (pageWidth - tituloWidth) / 2, startY);
+    startY += 10;
+
+    // Información del usuario y fecha
+    const userData = localStorage.getItem("usuario");
+    const usuario = userData ? JSON.parse(userData).nombre : "Usuario";
+    const fecha = new Date().toLocaleDateString();
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Usuario: ${usuario}`, startX, startY);
+    doc.text(`Fecha: ${fecha}`, pageWidth - margin - 40, startY);
+    startY += 10;
+
+    // Tabla de datos
+    autoTable(doc, {
+      startY: startY,
+      head: [titulos],
+      body: data.map(item => titulos.map(titulo => item[titulo])),
+      theme: 'grid',
+      headStyles: {
+        fillColor: [31, 78, 120],
+        textColor: 255,
+        fontSize: 10,
+        fontStyle: 'bold'
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 3
+      },
+      margin: { top: startY }
+    });
+
+    // Guardar el PDF
+    doc.save(`${nombre}-${new Date().toISOString().slice(0, 10)}.pdf`);
+  }
+
+  imprimirTabla(nombre: string, encabezadoTabla: string[], data: any[]): void {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let startY = margin;
+
+    // Configuración de estilos
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(31, 78, 120); // Color azul oscuro
+
+    // Título del reporte
+    const titulo = nombre.toUpperCase();
+    const tituloWidth = doc.getTextWidth(titulo);
+    doc.text(titulo, (pageWidth - tituloWidth) / 2, startY);
+    startY += 10;
+
+    // Información del usuario y fecha
+    const userData = localStorage.getItem("usuario");
+    const usuario = userData ? JSON.parse(userData).nombre : "Usuario";
+    const fecha = new Date().toLocaleDateString();
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Usuario: ${usuario}`, margin, startY);
+    doc.text(`Fecha: ${fecha}`, pageWidth - margin - 40, startY);
+    startY += 10;
+
+    // Tabla de datos
+    autoTable(doc, {
+      startY: startY,
+      head: [encabezadoTabla],
+      body: data,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [31, 78, 120],
+        textColor: 255,
+        fontSize: 10,
+        fontStyle: 'bold'
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 3
+      },
+      margin: { top: startY }
+    });
+
+    // Guardar el PDF
+    doc.save(`${nombre}-${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 }

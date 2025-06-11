@@ -44,7 +44,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = ApiConstants.Routes.ControllerName,
         Version = "v1",
-        Description = "API para la gestión de los usuarios"
+        Description = "API para la gestión de los solicitudes"
     });
 
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";

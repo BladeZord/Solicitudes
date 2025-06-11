@@ -27,6 +27,11 @@ namespace es_usuario.Controller.type
     public class AuthResponseType
     {
         /// <summary>
+        /// Identificador único del usuario.
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
         /// Token JWT generado.
         /// </summary>
         public string Token { get; set; } = string.Empty;

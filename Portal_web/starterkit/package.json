@@ -33,6 +33,8 @@
     "date-fns": "^2.30.0",
     "file-saver": "^2.0.5",
     "flatpickr": "^4.6.13",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "ngx-scrollbar": "^11.0.0",
     "ngx-toastr": "^16.2.0",
     "rxjs": "~7.8.0",

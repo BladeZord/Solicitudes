@@ -49,5 +49,26 @@ namespace es_solicitudes.Repository.contract
         /// <param name="usuarioAccionId">ID del usuario que realiza la acción.</param>
         /// <returns>True si el cambio fue exitoso, false en caso contrario.</returns>
         Task<bool> CambiarEstado(int solicitudId, int nuevoEstadoId, int usuarioAccionId);
+
+        /// <summary>
+        /// Obtiene solicitudes por ID de usuario.
+        /// </summary>
+        /// <param name="usuarioId">ID del usuario.</param>
+        /// <returns>Lista de solicitudes.</returns>
+        Task<List<SolicitudType>> ObtenerPorUsuarioId(int usuarioId);
+
+        /// <summary>
+        /// Obtiene solicitudes por ID de estado.
+        /// </summary>
+        /// <param name="estadoId">ID del estado.</param>
+        /// <returns>Lista de solicitudes.</returns>
+        Task<List<SolicitudType>> ObtenerPorEstadoId(int estadoId);
+
+        /// <summary>
+        /// Obtiene solicitudes por filtros.
+        /// </summary>
+        /// <param name="filtros">Filtros para la búsqueda.</param>
+        /// <returns>Lista de solicitudes.</returns>
+        Task<List<SolicitudType>> ObtenerPorFiltros(FiltrosSolicitudType filtros);
     }
 } 

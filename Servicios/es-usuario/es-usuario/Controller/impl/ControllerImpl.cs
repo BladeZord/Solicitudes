@@ -69,6 +69,7 @@ namespace es_usuario.Controller.impl
 
                 return Ok(new AuthResponseType
                 {
+                    Id = usuario.Id,
                     Token = token,
                     Correo = usuario.Correo,
                     Nombre = usuario.Nombre,

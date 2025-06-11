@@ -47,15 +47,16 @@ namespace es_solicitudes.Repository.impl
                 var sql = @"
                     SELECT 
                         s.Id,
+                        ISNULL(s.Codigo, '') AS Codigo,
                         s.Monto,
                         s.Plazo_meses AS PlazoMeses,
                         s.Ingresos_mensual AS IngresosMensual,
                         s.Antiguedad_laboral AS AntiguedadLaboral,
                         s.Estado_Id,
-                        c.Descripcion AS Estado_Descripcion,
+                        ISNULL(c.Descripcion, '') AS Estado_Descripcion,
                         s.Fecha_registro AS FechaRegistro,
                         s.Usuario_Id,
-                        u.Nombre AS Nombre_Usuario
+                        ISNULL(u.Nombre, '') AS Nombre_Usuario
                     FROM Solicitudes s
                     INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
                     INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
@@ -88,15 +89,16 @@ namespace es_solicitudes.Repository.impl
                 var sql = @"
                     SELECT 
                         s.Id,
+                        ISNULL(s.Codigo, '') AS Codigo,
                         s.Monto,
                         s.Plazo_meses AS PlazoMeses,
                         s.Ingresos_mensual AS IngresosMensual,
                         s.Antiguedad_laboral AS AntiguedadLaboral,
                         s.Estado_Id,
-                        c.Descripcion AS Estado_Descripcion,
+                        ISNULL(c.Descripcion, '') AS Estado_Descripcion,
                         s.Fecha_registro AS FechaRegistro,
                         s.Usuario_Id,
-                        u.Nombre AS Nombre_Usuario
+                        ISNULL(u.Nombre, '') AS Nombre_Usuario
                     FROM Solicitudes s
                     INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
                     INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
@@ -292,6 +294,177 @@ namespace es_solicitudes.Repository.impl
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
                 return rows > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las solicitudes por ID de usuario.
+        /// </summary>
+        /// <param name="usuarioId">ID del usuario.</param>
+        /// <returns>Lista de solicitudes del usuario.</returns>
+        public async Task<List<SolicitudType>> ObtenerPorUsuarioId(int usuarioId)
+        {
+            const string operation = nameof(ObtenerPorUsuarioId);
+            using var scope = _logger.BeginScope(new Dictionary<string, object> { ["usuarioId"] = usuarioId });
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+
+                var sql = @"
+                    SELECT 
+                        s.Id,
+                        ISNULL(s.Codigo, '') AS Codigo,
+                        s.Monto,
+                        s.Plazo_meses AS PlazoMeses,
+                        s.Ingresos_mensual AS IngresosMensual,
+                        s.Antiguedad_laboral AS AntiguedadLaboral,
+                        s.Estado_Id,
+                        ISNULL(c.Descripcion, '') AS Estado_Descripcion,
+                        s.Fecha_registro AS FechaRegistro,
+                        s.Usuario_Id,
+                        ISNULL(u.Nombre, '') AS Nombre_Usuario
+                    FROM Solicitudes s
+                    INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
+                    INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
+                    WHERE s.Usuario_Id = @UsuarioId
+                    ORDER BY s.Fecha_registro DESC";
+
+                var result = (await connection.QueryAsync<SolicitudType>(sql, new { UsuarioId = usuarioId })).ToList();
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las solicitudes por ID de estado.
+        /// </summary>
+        /// <param name="estadoId">ID del estado.</param>
+        /// <returns>Lista de solicitudes con el estado especificado.</returns>
+        public async Task<List<SolicitudType>> ObtenerPorEstadoId(int estadoId)
+        {
+            const string operation = nameof(ObtenerPorEstadoId);
+            using var scope = _logger.BeginScope(new Dictionary<string, object> { ["estadoId"] = estadoId });
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+
+                var sql = @"
+                    SELECT 
+                        s.Id,
+                        ISNULL(s.Codigo, '') AS Codigo,
+                        s.Monto,
+                        s.Plazo_meses AS PlazoMeses,
+                        s.Ingresos_mensual AS IngresosMensual,
+                        s.Antiguedad_laboral AS AntiguedadLaboral,
+                        s.Estado_Id,
+                        ISNULL(c.Descripcion, '') AS Estado_Descripcion,
+                        s.Fecha_registro AS FechaRegistro,
+                        s.Usuario_Id,
+                        ISNULL(u.Nombre, '') AS Nombre_Usuario
+                    FROM Solicitudes s
+                    INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
+                    INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
+                    WHERE s.Estado_Id = @EstadoId
+                    ORDER BY s.Fecha_registro DESC";
+
+                var result = (await connection.QueryAsync<SolicitudType>(sql, new { EstadoId = estadoId })).ToList();
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las solicitudes por filtros dinámicos.
+        /// </summary>
+        /// <param name="filtros">Filtros de búsqueda.</param>
+        /// <returns>Lista de solicitudes que cumplen con los filtros.</returns>
+        public async Task<List<SolicitudType>> ObtenerPorFiltros(FiltrosSolicitudType filtros)
+        {
+            const string operation = nameof(ObtenerPorFiltros);
+            using var scope = _logger.BeginScope(new Dictionary<string, object> 
+            { 
+                ["usuarioId"] = filtros.UsuarioId,
+                ["estadoId"] = filtros.EstadoId,
+                ["fechaInicio"] = filtros.FechaInicio,
+                ["fechaFin"] = filtros.FechaFin
+            });
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+
+                var sql = new StringBuilder(@"
+                    SELECT 
+                        s.Id,
+                        ISNULL(s.Codigo, '') AS Codigo,
+                        s.Monto,
+                        s.Plazo_meses AS PlazoMeses,
+                        s.Ingresos_mensual AS IngresosMensual,
+                        s.Antiguedad_laboral AS AntiguedadLaboral,
+                        s.Estado_Id,
+                        ISNULL(c.Descripcion, '') AS Estado_Descripcion,
+                        s.Fecha_registro AS FechaRegistro,
+                        s.Usuario_Id,
+                        ISNULL(u.Nombre, '') AS Nombre_Usuario
+                    FROM Solicitudes s
+                    INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
+                    INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
+                    WHERE 1=1");
+
+                var parameters = new DynamicParameters();
+
+                if (filtros.UsuarioId.HasValue)
+                {
+                    sql.Append(" AND s.Usuario_Id = @UsuarioId");
+                    parameters.Add("UsuarioId", filtros.UsuarioId.Value);
+                }
+
+                if (filtros.EstadoId.HasValue)
+                {
+                    sql.Append(" AND s.Estado_Id = @EstadoId");
+                    parameters.Add("EstadoId", filtros.EstadoId.Value);
+                }
+
+                if (filtros.FechaInicio.HasValue)
+                {
+                    sql.Append(" AND s.Fecha_registro >= @FechaInicio");
+                    parameters.Add("FechaInicio", filtros.FechaInicio.Value);
+                }
+
+                if (filtros.FechaFin.HasValue)
+                {
+                    sql.Append(" AND s.Fecha_registro <= @FechaFin");
+                    parameters.Add("FechaFin", filtros.FechaFin.Value);
+                }
+
+                sql.Append(" ORDER BY s.Fecha_registro DESC");
+
+                var result = (await connection.QueryAsync<SolicitudType>(sql.ToString(), parameters)).ToList();
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return result;
             }
             catch (Exception ex)
             {

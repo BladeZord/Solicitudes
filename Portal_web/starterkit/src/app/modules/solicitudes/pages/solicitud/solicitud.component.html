@@ -1,0 +1,150 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row w-100">
+            <div class="col-lg-12 mb-2">
+              <button class="btn btn-primary me-1" (click)="nuevoRegistro(modalSolicitud)">
+                <i class="fa fa-plus"></i> Nuevo
+              </button>
+              <button class="btn btn-secondary" (click)="exportarAExcel()">
+                <i class="fa fa-file-excel"></i> Exportar
+              </button>
+            </div>
+            <div class="col-lg-12">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>
+                      <input class="form-check-input" type="checkbox" [(ngModel)]="masterSeleccionado"
+                        (change)="toggleSeleccionarTodos()" />
+                    </th>
+                    <th scope="col">#</th>
+                    <th scope="col">Código</th>
+                    <th scope="col">Monto</th>
+                    <th scope="col">Plazo (Meses)</th>
+                    <th scope="col">Ingresos Mensual</th>
+                    <th scope="col">Antigüedad Laboral</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha Registro</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody *ngFor="
+                              let solicitud of arrayListSolicitudes
+                                  | slice
+                                  : (page - 1) * pageSize
+                                  : (page - 1) * pageSize + pageSize;
+                              let i = index
+                              ">
+                  <tr>
+                    <td>
+                      <input class="form-check-input" type="checkbox" [checked]="estaSeleccionado(solicitud.id)"
+                        (change)="toggleSeleccion(solicitud.id)" />
+                    </td>
+                    <td scope="row">{{ i + 1 }}</td>
+                    <td>{{ solicitud?.codigo || '-' }}</td>
+                    <td>{{ solicitud?.monto | currency }}</td>
+                    <td>{{ solicitud?.plazoMeses }}</td>
+                    <td>{{ solicitud?.ingresosMensual | currency }}</td>
+                    <td>{{ solicitud?.antiguedadLaboral }} meses</td>
+                    <td>{{ solicitud?.estado_Descripcion }}</td>
+                    <td>{{ solicitud?.fechaRegistro | date:'short' }}</td>
+                    <td>
+                      <button title="Editar" (click)="editarRegistro(modalSolicitud, solicitud)"
+                        class="btn btn-primary me-1 mb-1">
+                        <i class="fa fa-edit"> </i>
+                      </button>
+                      <button title="Eliminar" (click)="eliminarRegistro(solicitud.id)" class="btn btn-danger">
+                        <i class="fa fa-trash"> </i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <!-- Paginacion -->
+              <div class="row my-3">
+                <div class="col d-flex align-items-center">
+                  <label for="pageSizeControl" class="me-2">Vista</label>
+                  <select class="form-select" [(ngModel)]="pageSize" style="width: 15%" id="pageSizeControl">
+                    <option *ngFor="let numberPage of numberPages" [value]="numberPage" class="text-end">
+                      {{ numberPage }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col d-flex justify-content-end">
+                  <ngb-pagination [(page)]="page" [pageSize]="pageSize" [collectionSize]="arrayListSolicitudes.length"
+                    [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Solicitud -->
+<ng-template #modalSolicitud let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{ formulario.id === 0 ? 'Nueva Solicitud' : 'Editar Solicitud' }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <strong>
+        <label for="codigo" class="form-label me-2">Código:</label>
+        <i class="fas fa-hashtag "></i> {{ formulario.codigo}}
+      </strong>
+    </div>
+    <div class="mb-3">
+      <label for="monto" class="form-label">Monto:</label>
+      <input type="number" [(ngModel)]="formulario.monto" class="form-control" id="monto" min="0" step="0.01"
+        required />
+    </div>
+    <div class="mb-3">
+      <label for="plazoMeses" class="form-label">Plazo (Meses):</label>
+      <input type="number" [(ngModel)]="formulario.plazoMeses" class="form-control" id="plazoMeses" min="1" required />
+    </div>
+    <div class="mb-3">
+      <label for="ingresosMensual" class="form-label">Ingresos Mensual:</label>
+      <input type="number" [(ngModel)]="formulario.ingresosMensual" class="form-control" id="ingresosMensual" min="0"
+        step="0.01" required />
+    </div>
+    <div class="mb-3">
+      <label for="antiguedadLaboral" class="form-label">Antigüedad Laboral (Meses):</label>
+      <input type="number" [(ngModel)]="formulario.antiguedadLaboral" class="form-control" id="antiguedadLaboral"
+        min="1" required />
+    </div>
+    <div class="mb-3">
+      <label for="estado" class="form-label">Estado:</label>
+      <div *ngIf="formulario.id === 0">
+        <select class="form-select" [(ngModel)]="formulario.estado_Id" id="estado" required>
+          <option [ngValue]="0" hidden disabled selected>Seleccione...</option>
+          <option *ngFor="let estado of arrayListEstados" [ngValue]="estado.id">
+            {{ estado.descripcion }}
+          </option>
+        </select>
+      </div>
+      <div *ngIf="formulario.id !== 0" class="input-group">
+        <input type="text" [value]="obtenerDescripcionEstado(formulario.estado_Id)" class="form-control" readonly />
+        <div class="input-group-append">
+          <span class="input-group-text">
+            <i class="fas fa-info-circle"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancelar()">
+      <i class="fa fa-times"></i> Cerrar
+    </button>
+    <button type="button" class="btn btn-primary" (click)="guardarRegistro()">
+      <i class="fa fa-save"></i> Guardar
+    </button>
+  </div>
+</ng-template>

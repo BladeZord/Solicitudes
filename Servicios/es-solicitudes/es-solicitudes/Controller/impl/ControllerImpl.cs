@@ -355,5 +355,144 @@ namespace es_solicitudes.Controller.impl
                 throw;
             }
         }
+
+        /// <summary>
+        /// Obtiene las solicitudes por ID de usuario.
+        /// </summary>
+        /// <param name="usuarioId">ID del usuario.</param>
+        /// <returns>Lista de solicitudes del usuario.</returns>
+        /// <response code="200">Lista de solicitudes obtenida exitosamente</response>
+        /// <response code="500">Error interno del servidor</response>
+        [HttpGet("usuario/{usuarioId}")]
+        [ProducesResponseType(typeof(List<SolicitudType>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> ObtenerPorUsuarioId(int usuarioId)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "ObtenerPorUsuarioId",
+                    usuarioId
+                );
+
+                var result = await _service.ObtenerPorUsuarioId(usuarioId);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "ObtenerPorUsuarioId",
+                    usuarioId,
+                    "Success"
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    ApiConstants.LogMessages.OperationError,
+                    "ObtenerPorUsuarioId",
+                    ex.Message
+                );
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las solicitudes por ID de estado.
+        /// </summary>
+        /// <param name="estadoId">ID del estado.</param>
+        /// <returns>Lista de solicitudes con el estado especificado.</returns>
+        /// <response code="200">Lista de solicitudes obtenida exitosamente</response>
+        /// <response code="500">Error interno del servidor</response>
+        [HttpGet("estado/{estadoId}")]
+        [ProducesResponseType(typeof(List<SolicitudType>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> ObtenerPorEstadoId(int estadoId)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "ObtenerPorEstadoId",
+                    estadoId
+                );
+
+                var result = await _service.ObtenerPorEstadoId(estadoId);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "ObtenerPorEstadoId",
+                    estadoId,
+                    "Success"
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    ApiConstants.LogMessages.OperationError,
+                    "ObtenerPorEstadoId",
+                    ex.Message
+                );
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las solicitudes por filtros dinámicos.
+        /// </summary>
+        /// <param name="filtros">Filtros de búsqueda.</param>
+        /// <returns>Lista de solicitudes que cumplen con los filtros.</returns>
+        /// <response code="200">Lista de solicitudes obtenida exitosamente</response>
+        /// <response code="400">Datos de entrada inválidos</response>
+        /// <response code="500">Error interno del servidor</response>
+        [HttpPost("filtros")]
+        [ProducesResponseType(typeof(List<SolicitudType>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> ObtenerPorFiltros(FiltrosSolicitudType filtros)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "ObtenerPorFiltros",
+                    filtros
+                );
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { Success = false, Message = ApiConstants.ErrorMessages.InvalidInput, Errors = ModelState.Values.SelectMany(v => v.Errors) });
+                }
+
+                var result = await _service.ObtenerPorFiltros(filtros);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "ObtenerPorFiltros",
+                    result.Count,
+                    "Success"
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    ApiConstants.LogMessages.OperationError,
+                    "ObtenerPorFiltros",
+                    ex.Message
+                );
+                throw;
+            }
+        }
     }
 }
