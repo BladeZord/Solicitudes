@@ -143,6 +143,9 @@
     <button type="button" class="btn btn-secondary" (click)="cancelar()">
       <i class="fa fa-times"></i> Cerrar
     </button>
+    <button *ngIf="formulario.id !== 0" type="button" class="btn btn-info me-2" (click)="imprimirDetalleSolicitud(formulario)">
+      <i class="fa fa-print"></i> Imprimir
+    </button>
     <button type="button" class="btn btn-primary" (click)="guardarRegistro()">
       <i class="fa fa-save"></i> Guardar
     </button>

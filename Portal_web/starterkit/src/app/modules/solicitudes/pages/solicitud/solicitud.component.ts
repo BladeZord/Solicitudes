@@ -110,6 +110,30 @@ export class SolicitudComponent implements OnInit, OnDestroy {
     });
   }
 
+  imprimirDetalleSolicitud(solicitud: SolicitudType): void {
+    const titulos = [
+      "Código",
+      "Monto",
+      "Plazo (Meses)",
+      "Ingresos Mensuales",
+      "Antigüedad Laboral",
+      "Estado",
+      "Fecha de Registro"
+    ];
+
+    const data = [{
+      "Código": solicitud.codigo,
+      "Monto": `S/ ${solicitud.monto.toFixed(2)}`,
+      "Plazo (Meses)": solicitud.plazoMeses,
+      "Ingresos Mensuales": `S/ ${solicitud.ingresosMensual.toFixed(2)}`,
+      "Antigüedad Laboral": `${solicitud.antiguedadLaboral} años`,
+      "Estado": this.obtenerDescripcionEstado(solicitud.estado_Id),
+      "Fecha de Registro": new Date(solicitud.fechaRegistro).toLocaleDateString()
+    }];
+
+    this._utilService.exportarPDF("Detalle de Solicitud", titulos, data);
+  }
+
   cerrarModal(): void {
     this._modalService.dismissAll();
   }
@@ -269,7 +293,14 @@ export class SolicitudComponent implements OnInit, OnDestroy {
   }
 
   obtenerDataSolicitudes(): void {
-    this._solicitudService.obtenerSolicitudes().subscribe({
+    const userData = localStorage.getItem("usuario");
+    let usuarioId = 0;
+    if (userData) {
+      const user = JSON.parse(userData);
+      usuarioId = user.id;
+    }
+
+    this._solicitudService.obtenerSolicitudesPorUsuario(usuarioId).subscribe({
       next: (response) => {
         this.arrayListSolicitudes = response || [];
       },
