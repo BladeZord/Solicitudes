@@ -14,10 +14,11 @@ export class CatalogoService {
     return this._http.get<CatalogoType[]>(this.apiUrl);
   }
 
-  obtenerCatalogosPorTipo(tipo: string): Observable<CatalogoType[]> {
-    return this._http.get<CatalogoType[]>(this.apiUrl + "/tipo/" + tipo);
+  obtenerCatalogosPorTipo(tipo?: string): Observable<CatalogoType[]> {
+    const params = tipo ? { Tipo: tipo } : {};
+    return this._http.get<CatalogoType[]>(`${this.apiUrl}/tipo`, { params });
   }
-
+  
   obtenerCatalogosPorId(id: number): Observable<CatalogoType> {
     return this._http.get<CatalogoType>(this.apiUrl + "/" + id);
   }

@@ -1,12 +1,9 @@
 ﻿using Dapper;
-
 using es_catalogo.Constans;
 using es_catalogo.Controller.type;
 using es_catalogo.Repository.contract;
 using es_catalogo.utils;
-
 using System.Data.SqlClient;
-using System.Text;
 
 namespace es_catalogo.Repository.impl
 {
@@ -51,8 +48,8 @@ namespace es_catalogo.Repository.impl
                         Id,
                         Codigo,
                         Descripcion,
-                        Padre_Id,
-                        Tipo
+                        ISNULL(Padre_Id, 0) AS Padre_Id,
+                        ISNULL(Tipo, '') AS Tipo
                     FROM Catalogos
                     WHERE Id = @Id";
 
@@ -80,15 +77,16 @@ namespace es_catalogo.Repository.impl
             {
                 var connection = await _dbConexion.ObtenerConexion();
 
-                var sql = @"
-                    SELECT 
-                        Id,
-                        Codigo,
-                        Descripcion,
-                        Padre_Id,
-                        Tipo
-                    FROM Catalogos
-                    ORDER BY Codigo";
+                const string sql = @"
+                                    SELECT 
+                                        Id,
+                                        Codigo,
+                                        Descripcion,
+                                        ISNULL(Padre_Id, 0) AS Padre_Id,
+                                        ISNULL(Tipo, '') AS Tipo
+                                    FROM Catalogos
+                                    ORDER BY Codigo";
+
 
                 var result = (await connection.QueryAsync<CatalogoType>(sql)).ToList();
 
@@ -108,27 +106,50 @@ namespace es_catalogo.Repository.impl
         /// <param name="Tipo">Tipo de parametros.</param>
 
         /// <returns>Lista de catálogos.</returns>
-        public async Task<List<CatalogoType>> ObtenerPorTipo(string Tipo)
+        public async Task<List<CatalogoType>> ObtenerPorTipo(string? Tipo)
         {
             const string operation = nameof(ObtenerPorTipo);
             _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
 
             try
             {
+                string sql;
+                var parameters = new DynamicParameters();
+
                 var connection = await _dbConexion.ObtenerConexion();
 
-                var sql = @"
-                    SELECT 
-                        Id,
-                        Codigo,
-                        Descripcion,
-                        Padre_Id,
-                        Tipo
-                    FROM Catalogos
-                    WHERE Tipo = @Tipo
-                    ORDER BY Codigo";
+                if (string.IsNullOrWhiteSpace(Tipo))
+                {
+                    // Si Tipo es NULL, vacío o espacios → traer registros *sin tipo*
+                    sql = @"
+                            SELECT 
+                                Id,
+                                Codigo,
+                                Descripcion,
+                                ISNULL(Padre_Id, 0) AS Padre_Id,
+                                ISNULL(Tipo, '') AS Tipo
+                            FROM Catalogos
+                            WHERE (Tipo IS NULL OR Tipo = '') AND (Padre_Id = 0 OR Padre_Id IS NULL)
+                            ORDER BY Codigo;";
+                }
+                else
+                {
+                    // Si Tipo tiene valor → traer los registros con ese Tipo
+                    sql = @"
+                            SELECT 
+                                Id,
+                                Codigo,
+                                Descripcion,
+                                ISNULL(Padre_Id, 0) AS Padre_Id,
+                                ISNULL(Tipo, '') AS Tipo
+                            FROM Catalogos
+                            WHERE Tipo = @Tipo
+                            ORDER BY Codigo;";
 
-                var result = (await connection.QueryAsync<CatalogoType>(sql, new { Tipo })).ToList();
+                    parameters.Add("Tipo", Tipo);
+                }
+
+                var result = (await connection.QueryAsync<CatalogoType>(sql, parameters)).ToList();
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
                 return result;
@@ -139,6 +160,7 @@ namespace es_catalogo.Repository.impl
                 throw;
             }
         }
+
 
         /// <summary>
         /// Obtiene un catálogo específico por su identificador.

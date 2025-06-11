@@ -4,5 +4,4 @@ export interface CatalogoType {
   descripcion: string;
   padre_Id?:number
   tipo?: string;
-  selected?: boolean;
 }

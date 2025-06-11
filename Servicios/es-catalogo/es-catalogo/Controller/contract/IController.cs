@@ -40,7 +40,7 @@ namespace es_catalogo.Controller.contract
         /// </summary>
         /// <param name="Tipo">Tipo de parametros.</param>
         /// <returns>Lista de catálogos.</returns>
-        Task<ActionResult<object>> ObtenerPorTipo(string Tipo);
+        Task<ActionResult<object>> ObtenerPorTipo(string? Tipo);
 
         /// <summary>
         /// Obtiene un catálogo específico por su identificador.

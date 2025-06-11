@@ -47,6 +47,6 @@ namespace es_catalogo.Repository.contract
         /// <param name="id">Identificador del registro a eliminar.</param>
 
         /// <returns>Lista de catálogos.</returns>
-        Task<List<CatalogoType>> ObtenerPorTipo(string Tipo);
+        Task<List<CatalogoType>> ObtenerPorTipo(string? Tipo);
     }
 } 

@@ -245,11 +245,11 @@ namespace es_catalogo.Controller.impl
         /// </summary>
         /// <param name="Tipo">Tipo de parametros.</param>
         /// <returns>Lista de catálogos.</returns>
-        [HttpGet("tipo/{Tipo}")]
+        [HttpGet("tipo/")]
         [ProducesResponseType(typeof(List<CatalogoType>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
         [Produces(MimeType.JSON)]
-        public async Task<ActionResult<object>> ObtenerPorTipo(string Tipo)
+        public async Task<ActionResult<object>> ObtenerPorTipo([FromQuery] string? Tipo)
         {
             try
             {

@@ -38,9 +38,8 @@ namespace es_usuario.Controller.type
         /// <summary>
         /// Contraseña del usuario.
         /// </summary>
-        [Required]
         [StringLength(200)]
-        public string Contrasenia { get; set; } = string.Empty;
+        public string? Contrasenia { get; set; } = string.Empty;
 
         /// <summary>
         /// Domicilio del usuario.
@@ -51,7 +50,7 @@ namespace es_usuario.Controller.type
         /// <summary>
         /// Teléfono del usuario.
         /// </summary>
-        [StringLength(20)]
+        [StringLength(10)]
         public string? Telefono { get; set; }
 
         /// <summary>

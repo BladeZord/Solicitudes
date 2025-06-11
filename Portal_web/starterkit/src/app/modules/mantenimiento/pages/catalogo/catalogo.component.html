@@ -3,17 +3,19 @@
         <div class="row w-100">
             <div class="col-lg-12">
                 <div class="col-lg-12 mb-2">
-                    <button class="btn btn-primary me-1">
+                    <button class="btn btn-primary me-1" (click)="nuevoRegistro(modalContent)">
                         <i class="fa fa-plus"></i> Nuevo
                     </button>
-                    <button class="btn btn-secondary">
-                        <i class="fa fa-file"></i> Exportar
+                    <button class="btn btn-secondary" (click)="exportarAExcel()">
+                        <i class="fa fa-file-excel"></i> Exportar
                     </button>
                 </div>
-                <table class="table table-striped table-bordered table-hover">
+                <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" name="" id="" /></th>
+                            <th> <input class="form-check-input" type="checkbox" [(ngModel)]="masterSeleccionado"
+                                    (change)="toggleSeleccionarTodos()" />
+                            </th>
                             <th scope="col">#</th>
                             <th scope="col">Código</th>
                             <th scope="col">Descripción</th>
@@ -22,25 +24,26 @@
                         </tr>
                     </thead>
                     <tbody *ngFor="
-              let catalogo of arrayListCatalogos
-                | slice
-                  : (page - 1) * pageSize
-                  : (page - 1) * pageSize + pageSize;
-              let i = index
-            ">
+                                    let catalogo of arrayListCatalogos
+                                        | slice
+                                        : (page - 1) * pageSize
+                                        : (page - 1) * pageSize + pageSize;
+                                    let i = index
+                                    ">
                         <tr>
-                            <td><input type="checkbox" name="" id="" /></td>
+                            <td> <input class="form-check-input" type="checkbox" [checked]="estaSeleccionado(catalogo.id)"
+                                    (change)="toggleSeleccion(catalogo.id)" /></td>
 
                             <td scope="row">{{ i + 1 }}</td>
                             <td>{{ catalogo?.codigo }}</td>
                             <td>{{ catalogo?.descripcion }}</td>
                             <td>{{ catalogo?.tipo }}</td>
                             <td>
-                                <button class="btn btn-primary me-1">
-                                    <i class="fa fa-edit"> </i> Editar
+                                <button title="Editar" (click)="editarRegistro(modalContent, catalogo)" class="btn btn-primary me-1 mb-1">
+                                    <i class="fa fa-edit"> </i>
                                 </button>
-                                <button class="btn btn-danger">
-                                    <i class="fa fa-trash"> </i> Eliminar
+                                <button title="Eliminar" (click)="eliminarRegistro(catalogo.id)" class="btn btn-danger">
+                                    <i class="fa fa-trash"> </i>
                                 </button>
                             </td>
                         </tr>
@@ -67,3 +70,39 @@
         </div>
     </div>
 </div>
+
+<!-- Template del Modal -->
+<ng-template #modalContent let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">{{ formulario.id === 0 ? 'Nuevo Registro' : 'Editar Registro' }}</h4>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <label for="codigo" class="form-label">Código:</label>
+            <input type="text" [(ngModel)]="formulario.codigo" class="form-control" id="codigo" />
+        </div>
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción:</label>
+            <textarea [(ngModel)]="formulario.descripcion" class="form-control" id="descripcion"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="tipo" class="form-label">Tipo:</label>
+            <select class="form-select" [(ngModel)]="formulario.padre_Id" id="tipo">
+                <option [ngValue]="0" hidden disabled selected>Seleccione...</option>
+                <option [ngValue]="null">Sin tipado</option>
+                <option *ngFor="let tipo of arrayListCatalogosPadres" [ngValue]="tipo.id">
+                    {{ tipo.descripcion }}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            <i class="fa fa-times"></i> Cerrar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="guardarRegistro()">
+            <i class="fa fa-save"></i> Guardar
+        </button>
+    </div>
+</ng-template>

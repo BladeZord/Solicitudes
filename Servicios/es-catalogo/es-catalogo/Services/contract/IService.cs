@@ -44,6 +44,6 @@ namespace es_catalogo.Services.contract
         /// <param name="Tipo">Tipo de parametros.</param>
 
         /// <returns>Lista de catálogos.</returns>
-        Task<List<CatalogoType>> ObtenerPorTipo(string Tipo);
+        Task<List<CatalogoType>> ObtenerPorTipo(string? Tipo);
     }
 }

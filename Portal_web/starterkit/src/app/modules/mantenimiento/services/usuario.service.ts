@@ -33,7 +33,7 @@ export class UsuarioService {
   }
 
   crearUsuario(usuario: UsuarioType): Observable<UsuarioType> {
-    // No requiere token
+    // No requiere token para registro público
     return this._http
       .post<UsuarioType>(this.apiUrl, usuario)
       .pipe(catchError(this.handleError));
@@ -93,7 +93,11 @@ export class UsuarioService {
   }
 
   private handleError(error: any) {
-    // Aquí podrías hacer mejor manejo de errores, pero para la demo...
+    if (error.status === 401) {
+      // Token expirado o inválido
+      localStorage.removeItem("usuario");
+      window.location.href = "/login";
+    }
     console.error("API error", error);
     return throwError(() => error);
   }

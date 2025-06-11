@@ -55,7 +55,7 @@ namespace es_catalogo.Services.impl
         /// </summary>
         /// <param name="Tipo">Tipo de parametros.</param>
         /// <returns>Lista de catálogos.</returns>
-        public async Task<List<CatalogoType>> ObtenerPorTipo(string Tipo)
+        public async Task<List<CatalogoType>> ObtenerPorTipo(string? Tipo)
         {
             const string operation = nameof(ObtenerPorTipo);
 

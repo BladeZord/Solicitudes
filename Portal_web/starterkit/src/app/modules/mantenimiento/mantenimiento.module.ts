@@ -4,7 +4,8 @@ import { CatalogoComponent } from "./pages/catalogo/catalogo.component";
 import { UsuarioComponent } from "./pages/usuario/usuario.component";
 import { RouterModule, Routes } from "@angular/router";
 import { FormsModule } from "@angular/forms";
-import { NgbPaginationModule } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModalModule, NgbPaginationModule, NgbTooltipModule } from "@ng-bootstrap/ng-bootstrap";
+import { ToastrModule } from "ngx-toastr";
 
 const MANTENIMIENTO_ROUTES: Routes = [
   {
@@ -21,11 +22,11 @@ const MANTENIMIENTO_ROUTES: Routes = [
   {
     path: "usuario",
     data: {
-      title: "Usuario",
+      title: "Usuarios",
       urls: [
-        { title: "Mantenimiento", url: "/catalogo" },
+        { title: "Mantenimiento", url: "/usuario" },
 
-        { title: "Usuario", url: "/usuario" },
+        { title: "Usuarios", url: "/usuario" },
       ],
     },
     component: UsuarioComponent,
@@ -38,7 +39,10 @@ const MANTENIMIENTO_ROUTES: Routes = [
     CommonModule,
     RouterModule.forChild(MANTENIMIENTO_ROUTES),
     FormsModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    ToastrModule.forRoot({ timeOut: 3000 }),
+    NgbTooltipModule,
+    NgbModalModule
   ],
 })
 export class MantenimientoModule {}
