@@ -1,7 +1,3 @@
--- Crear la base de datos
-CREATE DATABASE SolicitudesDB;
-GO
-
 -- Usar la base de datos
 USE SolicitudesDB;
 GO
@@ -35,6 +31,8 @@ CREATE TABLE Solicitudes (
     Estado_Id INT NOT NULL, -- FK hacia Catalogos
     Fecha_registro DATETIME2 NOT NULL,
     Usuario_Id INT NOT NULL,
+    CONSTRAINT FK_Solicitudes_Estado FOREIGN KEY (Estado_Id) REFERENCES Catalogos(Id),
+    CONSTRAINT FK_Solicitudes_Usuario FOREIGN KEY (Usuario_Id) REFERENCES Usuarios(Id)
 );
 
 -- Tabla: Log_auditoria
@@ -51,12 +49,6 @@ CREATE TABLE Log_auditoria (
     CONSTRAINT FK_Log_Usuario FOREIGN KEY (Usuario_Id) REFERENCES Usuarios(Id),
     CONSTRAINT FK_Log_Solicitud FOREIGN KEY (Solicitud_Id) REFERENCES Solicitudes(Id)
 );
-
-
-
-/*---------------------------------------------*/
-USE SolicitudesDB;
-GO
 
 -- Crear nueva solicitud
 CREATE PROCEDURE sp_CrearSolicitud
