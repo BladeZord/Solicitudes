@@ -48,8 +48,8 @@ namespace es_solicitudes.Controller.type
         /// <summary>
         /// Identificador del estado de la solicitud.
         /// </summary>
-        [Required]
-        public int Estado_Id { get; set; }
+        [NotMapped]
+        public int? Estado_Id { get; set; }
 
         /// <summary>
         /// Descripción del estado (no mapeado a la base de datos).

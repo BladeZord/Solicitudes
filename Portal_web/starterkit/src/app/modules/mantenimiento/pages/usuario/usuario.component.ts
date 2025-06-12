@@ -27,7 +27,7 @@ export class UsuarioComponent implements OnInit, OnDestroy {
 
   constructor(
     private _usuarioService: UsuarioService,
-    private _utilService: LogicaComunService,
+    public _utilService: LogicaComunService,
     private _modalService: NgbModal
   ) {}
 

@@ -34,7 +34,6 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.bandera = false; // En caso que su valor este en true
-    this.ObtenerTipoPersona();
     this.reiniciarFormulario();
     this.reiniciarFormularioRegistro();
   }
@@ -93,11 +92,15 @@ export class LoginComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         console.error(err);
-        this._utilService.mostrarMensaje("error", err.error);
+        if (err.status >= 400 && err.status < 500) {
+          this._utilService.mostrarMensaje("warning", err.error.message);
+        } else {
+          this._utilService.mostrarMensaje("error", err.error.message);
+        }
       },
     });
   }
-  
+
   ObtenerTipoPersona() {
     this._catalogoService.obtenerCatalogosPorTipo("TIPO_PERSONA").subscribe({
       next: (response) => {
@@ -112,6 +115,8 @@ export class LoginComponent implements OnInit {
 
   mostarFormularioRegistro() {
     this.bandera = true;
+    this.reiniciarFormulario();
+    this.ObtenerTipoPersona();
     this.reiniciarFormularioRegistro();
   }
 
@@ -149,7 +154,7 @@ export class LoginComponent implements OnInit {
           "Usuario registrado exitosamente"
         );
         this.bandera = false;
-    this.reiniciarFormularioRegistro();
+        this.reiniciarFormularioRegistro();
       },
       error: (err: HttpErrorResponse) => {
         console.error(err);

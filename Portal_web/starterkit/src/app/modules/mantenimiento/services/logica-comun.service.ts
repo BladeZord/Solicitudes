@@ -184,4 +184,263 @@ export class LogicaComunService {
     // Guardar el PDF
     doc.save(`${nombre}-${new Date().toISOString().slice(0, 10)}.pdf`);
   }
+
+  /**
+   * Sanitiza un input para que solo acepte números
+   * @param event Evento del input
+   * @param allowDecimals Si permite decimales
+   * @param maxLength Longitud máxima permitida
+   */
+  soloNumeros(event: KeyboardEvent, allowDecimals: boolean = false, maxLength?: number): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Si se presiona backspace o delete, permitir
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return;
+    }
+
+    // Si se presiona tab, permitir
+    if (event.key === 'Tab') {
+      return;
+    }
+
+    // Validar longitud máxima
+    if (maxLength && value.length >= maxLength) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar si es número o punto decimal
+    const pattern = allowDecimals ? /^[0-9.]*$/ : /^[0-9]*$/;
+    if (!pattern.test(event.key)) {
+      event.preventDefault();
+      return;
+    }
+
+    // Si permite decimales, validar que no haya más de un punto
+    if (allowDecimals && event.key === '.' && value.includes('.')) {
+      event.preventDefault();
+      return;
+    }
+  }
+
+  /**
+   * Formatea un código permitiendo solo letras, números y guiones bajos
+   * @param event Evento del input
+   * @param maxLength Longitud máxima permitida
+   */
+  formatearCodigoEspecial(event: KeyboardEvent, maxLength: number = 15): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Si se presiona backspace o delete, permitir
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return;
+    }
+
+    // Si se presiona tab, permitir
+    if (event.key === 'Tab') {
+      return;
+    }
+
+    // Validar longitud máxima
+    if (value.length >= maxLength) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar si es letra, número o guión bajo
+    const pattern = /^[a-zA-Z0-9_]*$/;
+    if (!pattern.test(event.key)) {
+      event.preventDefault();
+      return;
+    }
+  }
+
+  /**
+   * Formatea un campo de descripción permitiendo letras, números, espacios y caracteres especiales limitados
+   * @param event Evento del input
+   * @param maxLength Longitud máxima permitida
+   */
+  formatearDescripcion(event: KeyboardEvent, maxLength: number = 50): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Si se presiona backspace o delete, permitir
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return;
+    }
+
+    // Si se presiona tab, permitir
+    if (event.key === 'Tab') {
+      return;
+    }
+
+    // Validar longitud máxima
+    if (value.length >= maxLength) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar si es letra, número, espacio o caracteres especiales permitidos
+    const pattern = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s,\.()]*$/;
+    if (!pattern.test(event.key)) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar que no haya más de 2 espacios consecutivos
+    if (event.key === ' ' && value.endsWith('  ')) {
+      event.preventDefault();
+      return;
+    }
+  }
+
+  /**
+   * Formatea un input para que solo acepte letras y espacios
+   * @param event Evento del input
+   * @param maxLength Longitud máxima permitida
+   */
+  soloLetras(event: KeyboardEvent, maxLength?: number): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Si se presiona backspace o delete, permitir
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return;
+    }
+
+    // Si se presiona tab, permitir
+    if (event.key === 'Tab') {
+      return;
+    }
+
+    // Validar longitud máxima
+    if (maxLength && value.length >= maxLength) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar si es letra o espacio
+    const pattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/;
+    if (!pattern.test(event.key)) {
+      event.preventDefault();
+      return;
+    }
+  }
+
+  /**
+   * Formatea un input para que solo acepte letras, números y espacios
+   * @param event Evento del input
+   * @param maxLength Longitud máxima permitida
+   */
+  alfanumerico(event: KeyboardEvent, maxLength?: number): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Si se presiona backspace o delete, permitir
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return;
+    }
+
+    // Si se presiona tab, permitir
+    if (event.key === 'Tab') {
+      return;
+    }
+
+    // Validar longitud máxima
+    if (maxLength && value.length >= maxLength) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar si es letra, número o espacio
+    const pattern = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]*$/;
+    if (!pattern.test(event.key)) {
+      event.preventDefault();
+      return;
+    }
+  }
+
+  /**
+   * Formatea un input para que solo acepte correos electrónicos
+   * @param event Evento del input
+   * @param maxLength Longitud máxima permitida
+   */
+  formatearEmail(event: KeyboardEvent, maxLength?: number): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Si se presiona backspace o delete, permitir
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return;
+    }
+
+    // Si se presiona tab, permitir
+    if (event.key === 'Tab') {
+      return;
+    }
+
+    // Validar longitud máxima
+    if (maxLength && value.length >= maxLength) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar si es caracter válido para email
+    const pattern = /^[a-zA-Z0-9@._-]*$/;
+    if (!pattern.test(event.key)) {
+      event.preventDefault();
+      return;
+    }
+  }
+
+  /**
+   * Formatea un input para que solo acepte números y el símbolo de moneda
+   * @param event Evento del input
+   * @param maxLength Longitud máxima permitida
+   */
+  formatearMoneda(event: KeyboardEvent, maxLength?: number): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Si se presiona backspace o delete, permitir
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return;
+    }
+
+    // Si se presiona tab, permitir
+    if (event.key === 'Tab') {
+      return;
+    }
+
+    // Validar longitud máxima
+    if (maxLength && value.length >= maxLength) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar si es número o punto decimal
+    const pattern = /^[0-9.]*$/;
+    if (!pattern.test(event.key)) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar que no haya más de un punto decimal
+    if (event.key === '.' && value.includes('.')) {
+      event.preventDefault();
+      return;
+    }
+
+    // Validar que no haya más de dos decimales
+    if (value.includes('.')) {
+      const decimales = value.split('.')[1];
+      if (decimales && decimales.length >= 2) {
+        event.preventDefault();
+        return;
+      }
+    }
+  }
 }

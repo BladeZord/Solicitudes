@@ -26,7 +26,7 @@ export class CatalogoComponent implements OnInit, OnDestroy {
 
   constructor(
     private _catalogoService: CatalogoService,
-    private _utilService: LogicaComunService,
+    public _utilService: LogicaComunService,
     private _modalService: NgbModal
   ) {}
 
@@ -44,7 +44,7 @@ export class CatalogoComponent implements OnInit, OnDestroy {
       id: 0,
       codigo: "",
       descripcion: "",
-      padre_Id: 0,
+      padre_Id: null,
       tipo: "",
     };
   }
@@ -167,7 +167,7 @@ export class CatalogoComponent implements OnInit, OnDestroy {
     this.formulario.id = catalogo.id;
     this.formulario.codigo = catalogo.codigo;
     this.formulario.descripcion = catalogo.descripcion;
-    this.formulario.padre_Id = catalogo.padre_Id || 0;
+    this.formulario.padre_Id = catalogo.padre_Id || null;
     this.formulario.tipo = catalogo.tipo || '';
     console.log('Formulario después de asignación explícita:', this.formulario);
 

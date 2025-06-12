@@ -61,10 +61,15 @@ namespace es_usuario.Services.impl
 
                 return usuario;
             }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
-                throw new ServiceException($"Error al consultar usuario: {ex.Message}");
+                throw;
             }
         }
 

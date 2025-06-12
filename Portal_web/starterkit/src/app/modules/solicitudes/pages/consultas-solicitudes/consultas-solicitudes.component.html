@@ -1,0 +1,187 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row w-100 mb-3">
+                        <!-- Sección de filtros -->
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="estadoFiltro" class="form-label">Estado:</label>
+                                    <select class="form-select" [(ngModel)]="filtros.estadoId" id="estadoFiltro">
+                                        <option [ngValue]="0">Todos</option>
+                                        <option *ngFor="let estado of arrayListEstados" [ngValue]="estado.id">
+                                            {{ estado.descripcion }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="fechaInicioFiltro" class="form-label">Fecha Desde:</label>
+                                    <input type="date" [(ngModel)]="filtros.fechaInicio" class="form-control"
+                                        id="fechaInicioFiltro" />
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="fechaFinFiltro" class="form-label">Fecha Hasta:</label>
+                                    <input type="date" [(ngModel)]="filtros.fechaFin" class="form-control"
+                                        id="fechaFinFiltro" />
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-primary me-2" (click)="aplicarFiltros()">
+                                    <i class="fa fa-search"></i> Aplicar Filtros
+                                </button>
+                                <button class="btn btn-secondary" (click)="limpiarFiltros()">
+                                    <i class="fa fa-eraser"></i> Limpiar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row w-100">
+                        <div class="col-lg-12">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input class="form-check-input" type="checkbox"
+                                                [(ngModel)]="masterSeleccionado" (change)="toggleSeleccionarTodos()" />
+                                        </th>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Código</th>
+                                        <th scope="col">Monto</th>
+                                        <th scope="col">Plazo (Meses)</th>
+                                        <th scope="col">Ingresos mensuales</th>
+                                        <th scope="col">Antigüedad laboral</th>
+                                        <th scope="col">Estado</th>
+                                        <th scope="col">Fecha de registro</th>
+                                        <th scope="col">Usuario</th>
+                                        <th scope="col">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody *ngFor="
+                              let solicitud of arrayListSolicitudes
+                                  | slice
+                                  : (page - 1) * pageSize
+                                  : (page - 1) * pageSize + pageSize;
+                              let i = index
+                              ">
+                                    <tr>
+                                        <td>
+                                            <input class="form-check-input" type="checkbox"
+                                                [checked]="estaSeleccionado(solicitud.id)"
+                                                (change)="toggleSeleccion(solicitud.id)" />
+                                        </td>
+                                        <td scope="row">{{ i + 1 }}</td>
+                                        <td>{{ solicitud?.codigo || '-' }}</td>
+                                        <td>{{ solicitud?.monto | currency }}</td>
+                                        <td>{{ solicitud?.plazoMeses }}</td>
+                                        <td>{{ solicitud?.ingresosMensual | currency }}</td>
+                                        <td>{{ solicitud?.antiguedadLaboral }} meses</td>
+                                        <td>{{ solicitud?.estado_Descripcion }}</td>
+                                        <td>{{ solicitud?.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
+                                        <td>{{ solicitud?.nombre_Usuario || '-' }}</td>
+                                        <td>
+                                            <button title="Ver Detalle y Cambiar Estado"
+                                                (click)="abrirModalDetalleEstado(modalDetalleEstado, solicitud)"
+                                                class="btn btn-info me-1 mb-1">
+                                                <i class="fa fa-info-circle"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot *ngIf="arrayListSolicitudes.length === 0">
+                                    <tr>
+                                        <td colspan="11" class="text-center">No hay solicitudes que coincidan con los
+                                            filtros.</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <!-- Paginacion -->
+                            <div class="row my-3">
+                                <div class="col d-flex align-items-center">
+                                    <label for="pageSizeControl" class="me-2">Vista</label>
+                                    <select class="form-select" [(ngModel)]="pageSize" style="width: 15%"
+                                        id="pageSizeControl">
+                                        <option *ngFor="let numberPage of numberPages" [value]="numberPage"
+                                            class="text-end">
+                                            {{ numberPage }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col d-flex justify-content-end">
+                                    <ngb-pagination [(page)]="page" [pageSize]="pageSize"
+                                        [collectionSize]="arrayListSolicitudes.length" [maxSize]="5"
+                                        [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle y Cambio de Estado -->
+<ng-template #modalDetalleEstado let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Detalle de Solicitud y Cambio de Estado</h4>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <strong>
+                <label for="codigoDetalle" class="form-label me-2">Código:</label>
+                <i class="fas fa-hashtag "></i> {{ formulario?.codigo}}
+            </strong>
+        </div>
+        <div class="mb-3">
+            <label for="montoDetalle" class="form-label">Monto:</label>
+            <input type="text" [value]="formulario?.monto | currency" class="form-control" readonly />
+        </div>
+        <div class="mb-3">
+            <label for="plazoMesesDetalle" class="form-label">Plazo (Meses):</label>
+            <input type="text" [value]="formulario?.plazoMeses" class="form-control" readonly />
+        </div>
+        <div class="mb-3">
+            <label for="ingresosMensualDetalle" class="form-label">Ingresos Mensual:</label>
+            <input type="text" [value]="formulario?.ingresosMensual | currency" class="form-control" readonly />
+        </div>
+        <div class="mb-3">
+            <label for="antiguedadLaboralDetalle" class="form-label">Antigüedad Laboral (Meses):</label>
+            <input type="text" [value]="formulario?.antiguedadLaboral" class="form-control" readonly />
+        </div>
+        <div class="mb-3">
+            <label for="estadoActualDetalle" class="form-label">Estado Actual:</label>
+            <input type="text" [value]="obtenerDescripcionEstado(formulario?.estado_Id)" class="form-control"
+                readonly />
+        </div>
+        <div class="mb-3">
+            <label for="usuarioDetalle" class="form-label">Usuario:</label>
+            <input type="text" [value]="formulario?.nombre_Usuario || '-'" class="form-control" readonly />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Cambiar Estado a:</label>
+            <div *ngFor="let estado of arrayListEstados" class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="nuevoEstado" id="estado{{estado.id}}"
+                    [value]="estado.id" [(ngModel)]="formulario.estado_Id"
+                    [checked]="formulario.estado_Id === estado.id" />
+                <label class="form-check-label" for="estado{{estado.id}}">{{ estado.descripcion }}</label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel')">
+            <i class="fa fa-times"></i> Cerrar
+        </button>
+        <button type="button" class="btn btn-info me-2" (click)="imprimirDetalleSolicitud(formulario)">
+            <i class="fa fa-print"></i> Imprimir
+        </button>
+        <button type="button" class="btn btn-primary" (click)="cambiarEstadoSolicitud()">
+            <i class="fa fa-save"></i> Guardar Cambio de Estado
+        </button>
+    </div>
+</ng-template>

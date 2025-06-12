@@ -56,7 +56,7 @@ namespace es_solicitudes.Repository.impl
                         ISNULL(c.Descripcion, '') AS Estado_Descripcion,
                         s.Fecha_registro AS FechaRegistro,
                         s.Usuario_Id,
-                        ISNULL(u.Nombre, '') AS Nombre_Usuario
+                        ISNULL(u.Nombre + ' ' + u.Apellidos, '') AS Nombre_Usuario
                     FROM Solicitudes s
                     INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
                     INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
@@ -98,7 +98,7 @@ namespace es_solicitudes.Repository.impl
                         ISNULL(c.Descripcion, '') AS Estado_Descripcion,
                         s.Fecha_registro AS FechaRegistro,
                         s.Usuario_Id,
-                        ISNULL(u.Nombre, '') AS Nombre_Usuario
+                        ISNULL(u.Nombre + ' ' + u.Apellidos, '') AS Nombre_Usuario
                     FROM Solicitudes s
                     INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
                     INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
@@ -156,7 +156,6 @@ namespace es_solicitudes.Repository.impl
                 ["plazo_meses"] = entityType.PlazoMeses,
                 ["ingresos_mensual"] = entityType.IngresosMensual,
                 ["antiguedad_laboral"] = entityType.AntiguedadLaboral,
-                ["estado_id"] = entityType.Estado_Id,
                 ["usuario_id"] = entityType.Usuario_Id
             });
 
@@ -171,7 +170,6 @@ namespace es_solicitudes.Repository.impl
                     entityType.PlazoMeses,
                     entityType.IngresosMensual,
                     entityType.AntiguedadLaboral,
-                    entityType.Estado_Id,
                     entityType.Usuario_Id
                 };
 
@@ -329,7 +327,7 @@ namespace es_solicitudes.Repository.impl
                         ISNULL(c.Descripcion, '') AS Estado_Descripcion,
                         s.Fecha_registro AS FechaRegistro,
                         s.Usuario_Id,
-                        ISNULL(u.Nombre, '') AS Nombre_Usuario
+                        ISNULL(u.Nombre + ' ' + u.Apellidos, '') AS Nombre_Usuario
                     FROM Solicitudes s
                     INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
                     INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
@@ -375,7 +373,7 @@ namespace es_solicitudes.Repository.impl
                         ISNULL(c.Descripcion, '') AS Estado_Descripcion,
                         s.Fecha_registro AS FechaRegistro,
                         s.Usuario_Id,
-                        ISNULL(u.Nombre, '') AS Nombre_Usuario
+                        ISNULL(u.Nombre + ' ' + u.Apellidos, '') AS Nombre_Usuario
                     FROM Solicitudes s
                     INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
                     INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
@@ -427,7 +425,7 @@ namespace es_solicitudes.Repository.impl
                         ISNULL(c.Descripcion, '') AS Estado_Descripcion,
                         s.Fecha_registro AS FechaRegistro,
                         s.Usuario_Id,
-                        ISNULL(u.Nombre, '') AS Nombre_Usuario
+                        ISNULL(u.Nombre + ' ' + u.Apellidos, '') AS Nombre_Usuario
                     FROM Solicitudes s
                     INNER JOIN Catalogos c ON c.Id = s.Estado_Id AND c.Tipo = 'ESTADO_SOLICITUD'
                     INNER JOIN Usuarios u ON u.Id = s.Usuario_Id
@@ -435,17 +433,18 @@ namespace es_solicitudes.Repository.impl
 
                 var parameters = new DynamicParameters();
 
-                if (filtros.UsuarioId.HasValue)
+                if (filtros.UsuarioId.HasValue && filtros.UsuarioId.Value != 0)
                 {
                     sql.Append(" AND s.Usuario_Id = @UsuarioId");
                     parameters.Add("UsuarioId", filtros.UsuarioId.Value);
                 }
 
-                if (filtros.EstadoId.HasValue)
+                if (filtros.EstadoId.HasValue && filtros.EstadoId.Value != 0)
                 {
                     sql.Append(" AND s.Estado_Id = @EstadoId");
                     parameters.Add("EstadoId", filtros.EstadoId.Value);
                 }
+
 
                 if (filtros.FechaInicio.HasValue)
                 {

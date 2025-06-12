@@ -6,7 +6,8 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { CatalogoService } from "../../../mantenimiento/services/catalogo.service";
 import { CatalogoType } from "../../../mantenimiento/interfaces/catalogo.interface";
-import { AuthResponseType } from "src/app/modules/auth/interfaces/AuthType.interface";
+import { Observable, throwError } from "rxjs";
+import { tap, catchError } from "rxjs/operators";
 
 @Component({
   selector: "app-solicitud",
@@ -22,23 +23,17 @@ export class SolicitudComponent implements OnInit, OnDestroy {
   numberPages: number[] = [5, 10, 15, 20, 25, 50, 100];
   page = 1;
   pageSize = 5;
-  tipoUsuario: string = "";
 
   constructor(
     private _solicitudService: SolicitudService,
     private _catalogoService: CatalogoService,
-    private _utilService: LogicaComunService,
+    public _utilService: LogicaComunService,
     private _modalService: NgbModal
   ) {}
 
   ngOnInit(): void {
-    const userData = localStorage.getItem("usuario");
-    if (userData) {
-      const user = JSON.parse(userData);
-      this.tipoUsuario = user.tipoUsuario;
-    }
     this.obtenerDataSolicitudes();
-    this.obtenerEstados();
+    this.obtenerEstados().subscribe();
     this.reiniciarFormulario();
   }
 
@@ -49,11 +44,9 @@ export class SolicitudComponent implements OnInit, OnDestroy {
   reiniciarFormulario(): void {
     const userData = localStorage.getItem("usuario");
     let usuarioId = 0;
-    let tipoUsuario = "";
     if (userData) {
-      const user: AuthResponseType = JSON.parse(userData);
+      const user = JSON.parse(userData);
       usuarioId = user.id;
-      tipoUsuario = user.rol[0]?.descripcion;
     }
 
     this.formulario = {
@@ -67,30 +60,21 @@ export class SolicitudComponent implements OnInit, OnDestroy {
       fechaRegistro: new Date(),
       usuario_Id: usuarioId,
     };
-
-    // Si es solicitante, establecer estado EN_REVISION por defecto al reiniciar el formulario
-    if (tipoUsuario === "Solicitante del requerimiento") {
-      const estadoEnRevision = this.arrayListEstados.find(
-        (e) => e.codigo === "EN_REVISION"
-      );
-      if (estadoEnRevision) {
-        this.formulario.estado_Id = estadoEnRevision.id;
-      }
-    }
   }
 
-  obtenerEstados(): void {
-    this._catalogoService
+  obtenerEstados(): Observable<CatalogoType[]> {
+    return this._catalogoService
       .obtenerCatalogosPorTipo("ESTADO_SOLICITUD")
-      .subscribe({
-        next: (response) => {
+      .pipe(
+        tap((response) => {
           this.arrayListEstados = response || [];
-        },
-        error: (err: HttpErrorResponse) => {
+        }),
+        catchError((err: HttpErrorResponse) => {
           console.error(err);
-          this._utilService.mostrarMensaje("error", err.error);
-        },
-      });
+          this._utilService.mostrarMensaje("error", err.error.message);
+          return throwError(() => err);
+        })
+      );
   }
 
   abrirModal(content: any, solicitud?: SolicitudType): void {
@@ -137,22 +121,18 @@ export class SolicitudComponent implements OnInit, OnDestroy {
       "Ingresos Mensuales",
       "Antigüedad Laboral",
       "Estado",
-      "Fecha de Registro",
+      "Fecha de Registro"
     ];
 
-    const data = [
-      {
-        Código: solicitud.codigo,
-        Monto: `S/ ${solicitud.monto.toFixed(2)}`,
-        "Plazo (Meses)": solicitud.plazoMeses,
-        "Ingresos Mensuales": `S/ ${solicitud.ingresosMensual.toFixed(2)}`,
-        "Antigüedad Laboral": `${solicitud.antiguedadLaboral} años`,
-        Estado: this.obtenerDescripcionEstado(solicitud.estado_Id),
-        "Fecha de Registro": new Date(
-          solicitud.fechaRegistro
-        ).toLocaleDateString(),
-      },
-    ];
+    const data = [{
+      "Código": solicitud.codigo,
+      "Monto": `S/ ${solicitud.monto.toFixed(2)}`,
+      "Plazo (Meses)": solicitud.plazoMeses,
+      "Ingresos Mensuales": `S/ ${solicitud.ingresosMensual.toFixed(2)}`,
+      "Antigüedad Laboral": `${solicitud.antiguedadLaboral} años`,
+      "Estado": this.obtenerDescripcionEstado(solicitud.estado_Id),
+      "Fecha de Registro": new Date(solicitud.fechaRegistro).toLocaleDateString()
+    }];
 
     this._utilService.exportarPDF("Detalle de Solicitud", titulos, data);
   }
@@ -274,41 +254,17 @@ export class SolicitudComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Obtener el tipo de usuario actual
     const userData = localStorage.getItem("usuario");
     let usuarioId = 0;
-    let tipoUsuario = "";
     if (userData) {
       const user = JSON.parse(userData);
       usuarioId = user.id;
-      tipoUsuario = user.tipoUsuario;
-    }
-
-    // Si es un nuevo registro, establecer el estado según la lógica de negocio
-    if (this.formulario.id === 0) {
-      // Si es solicitante, establecer estado EN_REVISION
-      if (tipoUsuario === "Solicitante del requerimiento") {
-        const estadoEnRevision = this.arrayListEstados.find(
-          (e) => e.codigo === "EN_REVISION"
-        );
-        if (estadoEnRevision) {
-          this.formulario.estado_Id = estadoEnRevision.id;
-        }
-      }
-
-      // Evaluación automática para PRE_APROBADO
-      if (this.formulario.ingresosMensual >= 1500) {
-        const estadoPreAprobado = this.arrayListEstados.find(
-          (e) => e.codigo === "PRE_APROBADO"
-        );
-        if (estadoPreAprobado) {
-          this.formulario.estado_Id = estadoPreAprobado.id;
-        }
-      }
     }
 
     if (this.formulario.id === 0) {
-      this._solicitudService.crearSolicitud(this.formulario).subscribe({
+      const { estado_Id, ...formularioSinEstado } = this.formulario;
+
+      this._solicitudService.crearSolicitud(formularioSinEstado as SolicitudType).subscribe({
         next: (response) => {
           this._utilService.mostrarMensaje(
             "success",
@@ -320,7 +276,7 @@ export class SolicitudComponent implements OnInit, OnDestroy {
         },
         error: (err: HttpErrorResponse) => {
           console.error(err);
-          this._utilService.mostrarMensaje("error", err.error);
+          this._utilService.mostrarMensaje("error", err.error.message);
         },
       });
     } else {
@@ -341,7 +297,7 @@ export class SolicitudComponent implements OnInit, OnDestroy {
         },
         error: (err: HttpErrorResponse) => {
           console.error(err);
-          this._utilService.mostrarMensaje("error", err.error);
+          this._utilService.mostrarMensaje("error", err.error.message);
         },
       });
     }
@@ -361,7 +317,7 @@ export class SolicitudComponent implements OnInit, OnDestroy {
       },
       error: (err: HttpErrorResponse) => {
         console.error(err);
-        this._utilService.mostrarMensaje("error", err.error);
+        this._utilService.mostrarMensaje("error", err.error.message);
       },
     });
   }
@@ -381,7 +337,7 @@ export class SolicitudComponent implements OnInit, OnDestroy {
       },
       error: (err: HttpErrorResponse) => {
         console.error(err);
-        this._utilService.mostrarMensaje("error", err.error);
+        this._utilService.mostrarMensaje("error", err.error.message);
       },
     });
   }

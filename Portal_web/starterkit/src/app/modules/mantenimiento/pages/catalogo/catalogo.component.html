@@ -78,19 +78,34 @@
         <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()"></button>
     </div>
     <div class="modal-body">
-        <div class="mb-3">
-            <label for="codigo" class="form-label">Código:</label>
-            <input type="text" [(ngModel)]="formulario.codigo" class="form-control" id="codigo" />
+        <div class="form-group">
+            <label for="codigo">Código</label>
+            <input
+                type="text"
+                class="form-control"
+                id="codigo"
+                name="codigo"
+                [(ngModel)]="formulario.codigo"
+                (keydown)="_utilService.formatearCodigoEspecial($event, 15)"
+                required
+            />
         </div>
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción:</label>
-            <textarea [(ngModel)]="formulario.descripcion" class="form-control" id="descripcion"></textarea>
+        <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <input
+                type="text"
+                class="form-control"
+                id="descripcion"
+                name="descripcion"
+                [(ngModel)]="formulario.descripcion"
+                (keydown)="_utilService.formatearDescripcion($event, 50)"
+                required
+            />
         </div>
         <div class="mb-3">
             <label for="tipo" class="form-label">Tipo:</label>
             <select class="form-select" [(ngModel)]="formulario.padre_Id" id="tipo">
-                <option [ngValue]="0" hidden disabled selected>Seleccione...</option>
-                <option [ngValue]="null">Sin tipado</option>
+                <option [ngValue]="null" hidden disabled selected>Sin tipado</option>
                 <option *ngFor="let tipo of arrayListCatalogosPadres" [ngValue]="tipo.id">
                     {{ tipo.descripcion }}
                 </option>

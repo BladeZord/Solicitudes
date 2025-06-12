@@ -79,7 +79,7 @@ namespace es_usuario.Controller.impl
             catch (ServiceException ex)
             {
                 _logger.LogError(ex, "Error de validación en la autenticación: {Message}", ex.Message);
-                return BadRequest(new { Success = false, Message = ex.Message });
+                throw;
             }
             catch (Exception ex)
             {

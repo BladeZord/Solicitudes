@@ -323,7 +323,7 @@ namespace es_usuario.Repository.impl
                         u.Domicilio,
                         u.Telefono,
                         r.Id as Rol_Id,
-                        r.Descripcion as Rol_Descripcion
+                        r.codigo as Rol_Descripcion
                     FROM Usuarios u
                     LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
                     LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id

@@ -24,10 +24,10 @@
                     <th scope="col">Código</th>
                     <th scope="col">Monto</th>
                     <th scope="col">Plazo (Meses)</th>
-                    <th scope="col">Ingresos Mensual</th>
-                    <th scope="col">Antigüedad Laboral</th>
+                    <th scope="col">Ingresos mensuales</th>
+                    <th scope="col">Antigüedad laboral</th>
                     <th scope="col">Estado</th>
-                    <th scope="col">Fecha Registro</th>
+                    <th scope="col">Fecha de registro</th>
                     <th scope="col">Acciones</th>
                   </tr>
                 </thead>
@@ -50,7 +50,7 @@
                     <td>{{ solicitud?.ingresosMensual | currency }}</td>
                     <td>{{ solicitud?.antiguedadLaboral }} meses</td>
                     <td>{{ solicitud?.estado_Descripcion }}</td>
-                    <td>{{ solicitud?.fechaRegistro | date:'short' }}</td>
+                    <td>{{ solicitud?.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>
                       <button title="Editar" (click)="editarRegistro(modalSolicitud, solicitud)"
                         class="btn btn-primary me-1 mb-1">
@@ -94,42 +94,86 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()"></button>
   </div>
   <div class="modal-body">
-    <div class="mb-3">
-      <strong>
-        <label for="codigo" class="form-label me-2">Código:</label>
-        <i class="fas fa-hashtag "></i> {{ formulario.codigo}}
-      </strong>
+    <div class="form-group">
+      <label for="codigo">Código</label>
+      <input
+        type="text"
+        class="form-control"
+        id="codigo"
+        name="codigo"
+        [(ngModel)]="formulario.codigo"
+        (keydown)="_utilService.formatearCodigoEspecial($event, 10)"
+        required
+      />
     </div>
-    <div class="mb-3">
-      <label for="monto" class="form-label">Monto:</label>
-      <input type="number" [(ngModel)]="formulario.monto" class="form-control" id="monto" min="0" step="0.01"
-        required />
+    <div class="form-group">
+      <label for="monto">Monto</label>
+      <input
+        type="text"
+        class="form-control"
+        id="monto"
+        name="monto"
+        [(ngModel)]="formulario.monto"
+        (keydown)="_utilService.formatearMoneda($event, 10)"
+        required
+      />
     </div>
-    <div class="mb-3">
-      <label for="plazoMeses" class="form-label">Plazo (Meses):</label>
-      <input type="number" [(ngModel)]="formulario.plazoMeses" class="form-control" id="plazoMeses" min="1" required />
+    <div class="form-group">
+      <label for="plazoMeses">Plazo (Meses)</label>
+      <input
+        type="text"
+        class="form-control"
+        id="plazoMeses"
+        name="plazoMeses"
+        [(ngModel)]="formulario.plazoMeses"
+        (keydown)="_utilService.soloNumeros($event, false, 2)"
+        required
+      />
     </div>
-    <div class="mb-3">
-      <label for="ingresosMensual" class="form-label">Ingresos Mensual:</label>
-      <input type="number" [(ngModel)]="formulario.ingresosMensual" class="form-control" id="ingresosMensual" min="0"
-        step="0.01" required />
+    <div class="form-group">
+      <label for="ingresosMensual">Ingresos Mensuales</label>
+      <input
+        type="text"
+        class="form-control"
+        id="ingresosMensual"
+        name="ingresosMensual"
+        [(ngModel)]="formulario.ingresosMensual"
+        (keydown)="_utilService.formatearMoneda($event, 10)"
+        required
+      />
     </div>
-    <div class="mb-3">
-      <label for="antiguedadLaboral" class="form-label">Antigüedad Laboral (Meses):</label>
-      <input type="number" [(ngModel)]="formulario.antiguedadLaboral" class="form-control" id="antiguedadLaboral"
-        min="1" required />
+    <div class="form-group">
+      <label for="antiguedadLaboral">Antigüedad Laboral (Años)</label>
+      <input
+        type="text"
+        class="form-control"
+        id="antiguedadLaboral"
+        name="antiguedadLaboral"
+        [(ngModel)]="formulario.antiguedadLaboral"
+        (keydown)="_utilService.soloNumeros($event, false, 2)"
+        required
+      />
     </div>
     <div class="mb-3">
       <label for="estado" class="form-label">Estado:</label>
-      <i class="fas fa-hashtag "></i> {{ formulario.id === 0 ? 'No aplica' : formulario.estado_Descripcion }}
-
+      <div class="input-group">
+        <input type="text"
+          [value]="formulario.id === 0 ? 'Estado asignado automáticamente' : obtenerDescripcionEstado(formulario.estado_Id)"
+          class="form-control" readonly />
+        <div class="input-group-append">
+          <span class="input-group-text">
+            <i class="fas fa-info-circle"></i>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="cancelar()">
       <i class="fa fa-times"></i> Cerrar
     </button>
-    <button *ngIf="formulario.id !== 0" type="button" class="btn btn-info me-2" (click)="imprimirDetalleSolicitud(formulario)">
+    <button *ngIf="formulario.id !== 0" type="button" class="btn btn-info me-2"
+      (click)="imprimirDetalleSolicitud(formulario)">
       <i class="fa fa-print"></i> Imprimir
     </button>
     <button type="button" class="btn btn-primary" (click)="guardarRegistro()">

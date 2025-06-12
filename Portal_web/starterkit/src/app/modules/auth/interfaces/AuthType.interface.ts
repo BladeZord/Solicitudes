@@ -3,7 +3,7 @@ export interface AuthResponseType {
   token: string;
   correo: string;
   nombre: string;
-  rol: RolType[];
+  roles: string[];
 }
 
 export interface RolType {
