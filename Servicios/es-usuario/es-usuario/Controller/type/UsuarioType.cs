@@ -68,12 +68,12 @@ namespace es_usuario.Controller.type
         /// <summary>
         /// Identificador del rol.
         /// </summary>
-        public int Id { get; set; }
+        public int Rol_Id { get; set; }
 
         /// <summary>
         /// Descripción del rol.
         /// </summary>
-        public string Descripcion { get; set; } = string.Empty;
+        public string Rol_Descripcion { get; set; } = string.Empty;
     }
 
     /// <summary>

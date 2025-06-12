@@ -121,22 +121,8 @@
     </div>
     <div class="mb-3">
       <label for="estado" class="form-label">Estado:</label>
-      <div *ngIf="formulario.id === 0">
-        <select class="form-select" [(ngModel)]="formulario.estado_Id" id="estado" required>
-          <option [ngValue]="0" hidden disabled selected>Seleccione...</option>
-          <option *ngFor="let estado of arrayListEstados" [ngValue]="estado.id">
-            {{ estado.descripcion }}
-          </option>
-        </select>
-      </div>
-      <div *ngIf="formulario.id !== 0" class="input-group">
-        <input type="text" [value]="obtenerDescripcionEstado(formulario.estado_Id)" class="form-control" readonly />
-        <div class="input-group-append">
-          <span class="input-group-text">
-            <i class="fas fa-info-circle"></i>
-          </span>
-        </div>
-      </div>
+      <i class="fas fa-hashtag "></i> {{ formulario.id === 0 ? 'No aplica' : formulario.estado_Descripcion }}
+
     </div>
   </div>
   <div class="modal-footer">

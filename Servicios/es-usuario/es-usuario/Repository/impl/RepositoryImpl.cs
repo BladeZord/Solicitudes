@@ -54,8 +54,8 @@ namespace es_usuario.Repository.impl
                         u.Correo,
                         u.Domicilio,
                         u.Telefono,
-                        r.Id as RolId,
-                        r.Descripcion as RolDescripcion
+                        r.Id as Rol_Id,
+                        r.Descripcion as Rol_Descripcion
                     FROM Usuarios u
                     LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
                     LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
@@ -80,7 +80,7 @@ namespace es_usuario.Repository.impl
                         return usuarioEntry;
                     },
                     new { Id = id },
-                    splitOn: "RolId"
+                    splitOn: "Rol_Id"
                 );
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
@@ -114,8 +114,8 @@ namespace es_usuario.Repository.impl
                         u.Correo,
                         u.Domicilio,
                         u.Telefono,
-                        r.Id as RolId,
-                        r.Descripcion as RolDescripcion
+                        r.Id as Rol_Id,
+                        r.Descripcion as Rol_Descripcion
                     FROM Usuarios u
                     LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
                     LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
@@ -139,7 +139,7 @@ namespace es_usuario.Repository.impl
                         }
                         return usuarioEntry;
                     },
-                    splitOn: "RolId"
+                    splitOn: "Rol_Id"
                 );
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
@@ -322,8 +322,8 @@ namespace es_usuario.Repository.impl
                         u.Contrasenia,
                         u.Domicilio,
                         u.Telefono,
-                        r.Id as RolId,
-                        r.Descripcion as RolDescripcion
+                        r.Id as Rol_Id,
+                        r.Descripcion as Rol_Descripcion
                     FROM Usuarios u
                     LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
                     LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
@@ -349,7 +349,7 @@ namespace es_usuario.Repository.impl
                         return usuarioEntry;
                     },
                     new { Correo = AuthParam.Correo, Contrasenia = AuthParam.Contrasenia },
-                    splitOn: "RolId"
+                    splitOn: "Rol_Id"
                 );
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);

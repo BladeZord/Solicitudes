@@ -1,9 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace es_usuario.utils
 {
     public class SanitizarInput
     {
+        private static readonly Random _random = new Random();
+
         /// <summary>
         /// Sanitiza el correo electrónico del usuario
         /// </summary>
@@ -91,6 +94,24 @@ namespace es_usuario.utils
                 return (null, null);
 
             return (correoSanitizado, contraseniaSanitizada);
+        }
+
+
+
+        /// <summary>
+        /// Genera un string aleatorio de asteriscos, con longitud mínima de 6 y aleatoria.
+        /// </summary>
+        /// <param name="input">El valor a "ocultar".</param>
+        /// <returns>Cadena de asteriscos aleatoria.</returns>
+        public static string GenerarAsteriscos(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
+
+            int longitudMinima = 6;
+            int longitudAleatoria = _random.Next(longitudMinima, longitudMinima + 10); // Puedes ajustar el rango
+
+            return new string('*', longitudAleatoria);
         }
     }
 }

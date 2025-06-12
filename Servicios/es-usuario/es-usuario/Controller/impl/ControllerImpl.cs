@@ -73,7 +73,7 @@ namespace es_usuario.Controller.impl
                     Token = token,
                     Correo = usuario.Correo,
                     Nombre = usuario.Nombre,
-                    Roles = usuario.Roles.Select(r => r.Descripcion).ToList()
+                    Roles = usuario.Roles.Select(r => r.Rol_Descripcion).ToList()
                 });
             }
             catch (ServiceException ex)
@@ -108,7 +108,7 @@ namespace es_usuario.Controller.impl
             // Agregar cada rol como un claim separado
             foreach (var rol in usuario.Roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, rol.Descripcion));
+                claims.Add(new Claim(ClaimTypes.Role, rol.Rol_Descripcion));
             }
 
             var token = new JwtSecurityToken(
