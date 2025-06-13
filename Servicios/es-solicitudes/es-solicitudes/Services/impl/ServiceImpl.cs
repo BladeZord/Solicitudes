@@ -295,5 +295,40 @@ namespace es_solicitudes.Services.impl
                 throw new ServiceException($"Error al obtener las solicitudes por filtros: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Obtiene el historial de auditoría por filtros.
+        /// </summary>
+        /// <param name="filtros">Filtros de búsqueda.</param>
+        /// <returns>Lista de registros de auditoría que cumplen con los filtros.</returns>
+        public async Task<List<HistorialAuditoriaType>> ObtenerHistorialAuditoria(FiltrosHistorialAuditoriaType filtros)
+        {
+            const string operation = nameof(ObtenerHistorialAuditoria);
+            using var scope = _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["solicitudId"] = filtros.SolicitudId,
+                ["usuarioId"] = filtros.UsuarioId,
+                ["estadoAnteriorId"] = filtros.EstadoAnteriorId,
+                ["estadoActualId"] = filtros.EstadoActualId,
+                ["fechaInicio"] = filtros.FechaInicio,
+                ["fechaFin"] = filtros.FechaFin
+            });
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+                var resultado = await _repository.ObtenerHistorialAuditoria(filtros);
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { Count = resultado.Count });
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al obtener el historial de auditoría: {ex.Message}");
+            }
+        }
     }
 }

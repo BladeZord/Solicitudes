@@ -494,5 +494,56 @@ namespace es_solicitudes.Controller.impl
                 throw;
             }
         }
+
+        /// <summary>
+        /// Obtiene el historial de auditoría por filtros.
+        /// </summary>
+        /// <param name="filtros">Filtros de búsqueda.</param>
+        /// <returns>Lista de registros de auditoría que cumplen con los filtros.</returns>
+        /// <response code="200">Lista de registros de auditoría obtenida exitosamente</response>
+        /// <response code="400">Datos de entrada inválidos</response>
+        /// <response code="500">Error interno del servidor</response>
+        [HttpPost("historial-auditoria")]
+        [ProducesResponseType(typeof(List<HistorialAuditoriaType>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> ObtenerHistorialAuditoria(FiltrosHistorialAuditoriaType filtros)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "ObtenerHistorialAuditoria",
+                    filtros
+                );
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { Success = false, Message = ApiConstants.ErrorMessages.InvalidInput, Errors = ModelState.Values.SelectMany(v => v.Errors) });
+                }
+
+                var result = await _service.ObtenerHistorialAuditoria(filtros);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "ObtenerHistorialAuditoria",
+                    result.Count,
+                    "Success"
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    ApiConstants.LogMessages.OperationError,
+                    "ObtenerHistorialAuditoria",
+                    ex.Message
+                );
+                throw;
+            }
+        }
     }
 }

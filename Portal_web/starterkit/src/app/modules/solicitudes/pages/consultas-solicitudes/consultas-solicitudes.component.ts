@@ -24,8 +24,8 @@ export class ConsultasSolicitudesComponent implements OnInit, OnDestroy {
   filtros: FiltrosSolicitudType = {
     usuarioId: 0,
     estadoId: 0,
-    fechaInicio: '',
-    fechaFin: '',
+    fechaInicio: "",
+    fechaFin: "",
   };
   masterSeleccionado: boolean = false;
   idsSeleccionados: number[] = [];
@@ -71,15 +71,17 @@ export class ConsultasSolicitudesComponent implements OnInit, OnDestroy {
   }
 
   aplicarFiltros(): void {
-    this._solicitudService.obtenerSolicitudesPorFiltros(this.filtros).subscribe({
-      next: (response) => {
-        this.arrayListSolicitudes = response || [];
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error(err);
-        this._utilService.mostrarMensaje("error", err.error.message);
-      },
-    });
+    this._solicitudService
+      .obtenerSolicitudesPorFiltros(this.filtros)
+      .subscribe({
+        next: (response) => {
+          this.arrayListSolicitudes = response || [];
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error(err);
+          this._utilService.mostrarMensaje("error", err.error.message);
+        },
+      });
   }
 
   limpiarFiltros(): void {
@@ -156,7 +158,17 @@ export class ConsultasSolicitudesComponent implements OnInit, OnDestroy {
     );
   }
 
-  abrirModalDetalleEstado(content: any, solicitud: SolicitudType): void {
+  abrirModalDetalle(content: any, solicitud: SolicitudType): void {
+    this.formulario = { ...solicitud }; // Copiar la solicitud para no modificar la original
+    this._modalService.open(content, {
+      ariaLabelledBy: "modal-basic-title",
+      size: "lg",
+      backdrop: "static",
+      keyboard: false,
+    });
+  }
+
+  abrirModalCambioEstado(content: any, solicitud: SolicitudType): void {
     this.formulario = { ...solicitud }; // Copiar la solicitud para no modificar la original
     this._modalService.open(content, {
       ariaLabelledBy: "modal-basic-title",
@@ -167,27 +179,56 @@ export class ConsultasSolicitudesComponent implements OnInit, OnDestroy {
   }
 
   imprimirDetalleSolicitud(solicitud: SolicitudType): void {
-    const titulos = [
-      "Código",
-      "Monto",
-      "Plazo (Meses)",
-      "Ingresos Mensuales",
-      "Antigüedad Laboral",
-      "Estado",
-      "Fecha de Registro"
+    const userData = localStorage.getItem("usuario");
+    let nombreUsuario = "";
+    if (userData) {
+      const user = JSON.parse(userData);
+      nombreUsuario = user.nombre + " " + user.apellidos;
+    }
+
+    const fechaImpresion = new Date().toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const headerText = [
+      "", // Espacio en blanco para centrar el título
+      "DETALLE DE SOLICITUD",
+      "",
+      `Usuario: ${nombreUsuario}`,
+      `Fecha de impresión: ${fechaImpresion}`,
+      "", // Espacio extra
     ];
 
-    const data = [{
-      "Código": solicitud.codigo,
-      "Monto": `S/ ${solicitud.monto.toFixed(2)}`,
+    const dataFormulario = {
+      Código: solicitud.codigo,
+      Solicitante: solicitud.nombre_Usuario || "",
+      Monto: `S/ ${solicitud.monto.toFixed(2)}`,
       "Plazo (Meses)": solicitud.plazoMeses,
       "Ingresos Mensuales": `S/ ${solicitud.ingresosMensual.toFixed(2)}`,
       "Antigüedad Laboral": `${solicitud.antiguedadLaboral} años`,
-      "Estado": this.obtenerDescripcionEstado(solicitud.estado_Id),
-      "Fecha de Registro": new Date(solicitud.fechaRegistro).toLocaleDateString()
-    }];
+      Estado: this.obtenerDescripcionEstado(solicitud.estado_Id),
+      "Fecha de Registro": new Date(solicitud.fechaRegistro).toLocaleString(
+        "es-ES",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }
+      ),
+    };
 
-    this._utilService.exportarPDF("Detalle de Solicitud", titulos, data);
+    this._utilService.exportarPDFPersonalizado(
+      "Detalle de Solicitud",
+      headerText,
+      [], // No hay columnas para formato de formulario
+      dataFormulario,
+      false // Indica formato de formulario
+    );
   }
 
   cambiarEstadoSolicitud(): void {
@@ -199,7 +240,10 @@ export class ConsultasSolicitudesComponent implements OnInit, OnDestroy {
     }
 
     if (!this.formulario.id || this.formulario.estado_Id === 0) {
-      this._utilService.mostrarMensaje("warning", "Seleccione un estado válido.");
+      this._utilService.mostrarMensaje(
+        "warning",
+        "Seleccione un estado válido."
+      );
       return;
     }
 
@@ -209,20 +253,76 @@ export class ConsultasSolicitudesComponent implements OnInit, OnDestroy {
       usuarioAccionId: usuarioAccionId,
     };
 
-    this._solicitudService.cambiarEstadoSolicitud(cambioEstadoPayload).subscribe({
-      next: () => {
-        this._utilService.mostrarMensaje("success", "Estado de solicitud actualizado correctamente");
-        this._modalService.dismissAll();
-        this.aplicarFiltros(); // Refrescar la tabla
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error(err);
-        this._utilService.mostrarMensaje("error", err.error.message);
-      },
-    });
+    this._solicitudService
+      .cambiarEstadoSolicitud(cambioEstadoPayload)
+      .subscribe({
+        next: () => {
+          this._utilService.mostrarMensaje(
+            "success",
+            "Estado de solicitud actualizado correctamente"
+          );
+          this._modalService.dismissAll();
+          this.aplicarFiltros(); // Refrescar la tabla
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error(err);
+          this._utilService.mostrarMensaje("error", err.error.message);
+        },
+      });
+  }
+
+  exportarAExcel(): void {
+    if (this.arrayListSolicitudes.length === 0) {
+      this._utilService.mostrarMensaje(
+        "warning",
+        "No hay solicitudes por exportar."
+      );
+      return;
+    }
+    const seleccionados =
+      this.idsSeleccionados.length > 0
+        ? this.arrayListSolicitudes.filter((s) =>
+            this.idsSeleccionados.includes(s.id)
+          )
+        : this.arrayListSolicitudes;
+    const titulos = [
+      "#",
+      "Código",
+      "Monto",
+      "Plazo (meses)",
+      "Ingesos (mensual)",
+      "Antigüedad laboral",
+      "Estado",
+      "Fecha de registro",
+      "Usuario",
+    ];
+
+    const datosParaExportar = seleccionados.map((item, index) => ({
+      "#": index + 1,
+      Código: item.codigo,
+      Monto: item.monto,
+      "Plazo (meses)": item.plazoMeses,
+      "Ingresos (mensual)": item.ingresosMensual,
+      "Antigüedad laboral": item.antiguedadLaboral,
+      Estado: this.obtenerDescripcionEstado(item.estado_Id),
+      "Fecha de registro": new Date(item.fechaRegistro).toLocaleString(
+        "es-ES",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }
+      ),
+      Usuario: item.nombre_Usuario || "-",
+    }));
+
+    this._utilService.exportarExcel("Solicitudes", titulos, datosParaExportar);
   }
 
   // Métodos de SolicitudComponent que no son relevantes para consultas:
-  // nuevoRegistro, guardarRegistro, editarRegistro, eliminarRegistro, 
+  // nuevoRegistro, guardarRegistro, editarRegistro, eliminarRegistro,
   // cerrarModal, cancelar. Se eliminarán del HTML también.
-} 
+}

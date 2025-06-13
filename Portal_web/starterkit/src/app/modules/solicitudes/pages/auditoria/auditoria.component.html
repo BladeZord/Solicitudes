@@ -1,0 +1,187 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Filtros -->
+                    <div class="row mb-3">
+                        <div class="col-md-2">
+                            <label class="form-label">Solicitud</label>
+                            <select class="form-select" [(ngModel)]="filtros.solicitudId">
+                                <option [ngValue]="0">Todas</option>
+                                <option *ngFor="let solicitud of arrayListSolicitudes" [ngValue]="solicitud.id">
+                                    {{ solicitud.codigo }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Usuario</label>
+                            <select class="form-select" [(ngModel)]="filtros.usuarioId">
+                                <option [ngValue]="0">Todos</option>
+                                <option *ngFor="let usuario of arrayListUsuarios" [ngValue]="usuario.id">
+                                    {{ usuario.nombre }} {{ usuario.apellidos }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Estado Anterior</label>
+                            <select class="form-select" [(ngModel)]="filtros.estadoAnteriorId">
+                                <option [ngValue]="0">Todos</option>
+                                <option *ngFor="let estado of arrayListEstados" [ngValue]="estado.id">
+                                    {{ estado.descripcion }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Estado Actual</label>
+                            <select class="form-select" [(ngModel)]="filtros.estadoActualId">
+                                <option [ngValue]="0">Todos</option>
+                                <option *ngFor="let estado of arrayListEstados" [ngValue]="estado.id">
+                                    {{ estado.descripcion }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fecha Inicio</label>
+                            <input type="date" class="form-control" [(ngModel)]="filtros.fechaInicio" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fecha Fin</label>
+                            <input type="date" class="form-control" [(ngModel)]="filtros.fechaFin" />
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary me-2" (click)="aplicarFiltros()">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                            <button type="button" class="btn btn-secondary" (click)="limpiarFiltros()">
+                                <i class="fas fa-eraser"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de resultados -->
+                    <div>
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha Registro</th>
+                                    <th>Acción</th>
+                                    <th>Estado Anterior</th>
+                                    <th>Estado Actual</th>
+                                    <th>Usuario</th>
+                                    <th>Código Solicitud</th>
+                                    <th>Monto</th>
+                                    <th>Plazo (Meses)</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let historial of arrayListHistorial | slice: (page-1) * pageSize : page * pageSize">
+                                    <td>{{ historial.fecha_registro | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                    <td>{{ historial.accion }}</td>
+                                    <td>{{ historial.estadoAnterior }}</td>
+                                    <td>{{ historial.estadoActual }}</td>
+                                    <td>{{ historial.nombreUsuario }}</td>
+                                    <td>{{ historial.codigoSolicitud }}</td>
+                                    <td>$ {{ historial.monto | number:'1.2-2' }}</td>
+                                    <td>{{ historial.plazoMeses }}</td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm me-2 mb-1"
+                                            (click)="abrirModalDetalle(detalleModal, historial)"
+                                            ngbTooltip="Ver detalle">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-primary btn-sm mb-1"
+                                            (click)="imprimirDetalleHistorial(historial)" ngbTooltip="Imprimir">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="row my-3">
+                        <div class="col d-flex align-items-center">
+                            <label for="pageSizeControl" class="me-2">Vista</label>
+                            <select class="form-select" [(ngModel)]="pageSize" style="width: 15%"
+                                id="pageSizeControl">
+                                <option *ngFor="let numberPage of numberPages" [value]="numberPage"
+                                    class="text-end">
+                                    {{ numberPage }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col d-flex justify-content-end">
+                            <ngb-pagination [(page)]="page" [pageSize]="pageSize"
+                                [collectionSize]="arrayListHistorial.length" [maxSize]="5"
+                                [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalle -->
+<ng-template #detalleModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title">Detalle del Historial</h4>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Fecha Registro:</label>
+                <p>{{ historial?.fecha_registro | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Acción:</label>
+                <p>{{ historial?.accion }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Estado Anterior:</label>
+                <p>{{ historial?.estadoAnterior }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Estado Actual:</label>
+                <p>{{ historial?.estadoActual }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Usuario:</label>
+                <p>{{ historial?.nombreUsuario }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Código Solicitud:</label>
+                <p>{{ historial?.codigoSolicitud }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Monto:</label>
+                <p>S/ {{ historial?.monto | number:'1.2-2' }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Plazo (Meses):</label>
+                <p>{{ historial?.plazoMeses }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Fecha Solicitud:</label>
+                <p>{{ historial?.fechaSolicitud | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="imprimirDetalleHistorial(historial)">
+            <i class="fas fa-print"></i> Imprimir
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close('Close click')">
+            Cerrar
+        </button>
+    </div>
+</ng-template>

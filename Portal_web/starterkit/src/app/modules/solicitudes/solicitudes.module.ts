@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SolicitudComponent } from './pages/solicitud/solicitud.component';
 import { ConsultasSolicitudesComponent } from './pages/consultas-solicitudes/consultas-solicitudes.component';
+import { AuditoriaComponent } from './pages/auditoria/auditoria.component';
 import { Routes } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule, NgbTooltipModule, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
@@ -33,10 +34,25 @@ const SOLICITUDES_ROUTES: Routes = [
     },
     component: ConsultasSolicitudesComponent,
   },
+  {
+    path: "auditoria",
+    data: {
+      title: "Auditoría de Solicitudes",
+      urls: [
+        { title: "Auditoría", url: "/auditoria" },
+        { title: "Auditoría de Solicitudes", url: "/auditoria" },
+      ],
+    },
+    component: AuditoriaComponent,
+  },
 ];
 
 @NgModule({
-  declarations: [SolicitudComponent, ConsultasSolicitudesComponent],
+  declarations: [
+    SolicitudComponent,
+    ConsultasSolicitudesComponent,
+    AuditoriaComponent
+  ],
   imports: [
     CommonModule,
     RouterModule.forChild(SOLICITUDES_ROUTES),

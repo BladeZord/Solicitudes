@@ -96,63 +96,28 @@
   <div class="modal-body">
     <div class="form-group">
       <label for="codigo">Código</label>
-      <input
-        type="text"
-        class="form-control"
-        id="codigo"
-        name="codigo"
-        [(ngModel)]="formulario.codigo"
-        (keydown)="_utilService.formatearCodigoEspecial($event, 10)"
-        required
-      />
+      <input type="text" class="form-control" id="codigo" name="codigo" [(ngModel)]="formulario.codigo"
+        (keydown)="_utilService.formatearCodigoEspecial($event, 10)" required />
     </div>
     <div class="form-group">
       <label for="monto">Monto</label>
-      <input
-        type="text"
-        class="form-control"
-        id="monto"
-        name="monto"
-        [(ngModel)]="formulario.monto"
-        (keydown)="_utilService.formatearMoneda($event, 10)"
-        required
-      />
+      <input type="text" class="form-control" id="monto" name="monto" [(ngModel)]="formulario.monto"
+        (keydown)="_utilService.formatearMoneda($event, 10)" required />
     </div>
     <div class="form-group">
       <label for="plazoMeses">Plazo (Meses)</label>
-      <input
-        type="text"
-        class="form-control"
-        id="plazoMeses"
-        name="plazoMeses"
-        [(ngModel)]="formulario.plazoMeses"
-        (keydown)="_utilService.soloNumeros($event, false, 2)"
-        required
-      />
+      <input type="text" class="form-control" id="plazoMeses" name="plazoMeses" [(ngModel)]="formulario.plazoMeses"
+        (keydown)="_utilService.soloNumeros($event, false, 2)" required />
     </div>
     <div class="form-group">
       <label for="ingresosMensual">Ingresos Mensuales</label>
-      <input
-        type="text"
-        class="form-control"
-        id="ingresosMensual"
-        name="ingresosMensual"
-        [(ngModel)]="formulario.ingresosMensual"
-        (keydown)="_utilService.formatearMoneda($event, 10)"
-        required
-      />
+      <input type="text" class="form-control" id="ingresosMensual" name="ingresosMensual"
+        [(ngModel)]="formulario.ingresosMensual" (keydown)="_utilService.formatearMoneda($event, 10)" required />
     </div>
     <div class="form-group">
       <label for="antiguedadLaboral">Antigüedad Laboral (Años)</label>
-      <input
-        type="text"
-        class="form-control"
-        id="antiguedadLaboral"
-        name="antiguedadLaboral"
-        [(ngModel)]="formulario.antiguedadLaboral"
-        (keydown)="_utilService.soloNumeros($event, false, 2)"
-        required
-      />
+      <input type="text" class="form-control" id="antiguedadLaboral" name="antiguedadLaboral"
+        [(ngModel)]="formulario.antiguedadLaboral" (keydown)="_utilService.soloNumeros($event, false, 2)" required />
     </div>
     <div class="mb-3">
       <label for="estado" class="form-label">Estado:</label>
@@ -165,6 +130,7 @@
             <i class="fas fa-info-circle"></i>
           </span>
         </div>
+        <br>
       </div>
     </div>
   </div>

@@ -29,10 +29,13 @@
                             </div>
                             <div class="mt-3">
                                 <button class="btn btn-primary me-2" (click)="aplicarFiltros()">
-                                    <i class="fa fa-search"></i> Aplicar Filtros
+                                    <i class="fa fa-search"></i> Buscar
                                 </button>
-                                <button class="btn btn-secondary" (click)="limpiarFiltros()">
-                                    <i class="fa fa-eraser"></i> Limpiar Filtros
+                                <button class="btn btn-secondary me-2" (click)="limpiarFiltros()">
+                                    <i class="fa fa-eraser"></i> Limpiar
+                                </button>
+                                <button class="btn btn-success" (click)="exportarAExcel()">
+                                    <i class="fa fa-file-excel"></i> Exportar
                                 </button>
                             </div>
                         </div>
@@ -53,10 +56,10 @@
                                         <th scope="col">Código</th>
                                         <th scope="col">Monto</th>
                                         <th scope="col">Plazo (Meses)</th>
-                                        <th scope="col">Ingresos mensuales</th>
-                                        <th scope="col">Antigüedad laboral</th>
+                                        <th scope="col">Ingresos Mensual</th>
+                                        <th scope="col">Antigüedad Laboral</th>
                                         <th scope="col">Estado</th>
-                                        <th scope="col">Fecha de registro</th>
+                                        <th scope="col">Fecha Registro</th>
                                         <th scope="col">Usuario</th>
                                         <th scope="col">Acciones</th>
                                     </tr>
@@ -84,17 +87,20 @@
                                         <td>{{ solicitud?.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
                                         <td>{{ solicitud?.nombre_Usuario || '-' }}</td>
                                         <td>
-                                            <button title="Ver Detalle y Cambiar Estado"
-                                                (click)="abrirModalDetalleEstado(modalDetalleEstado, solicitud)"
+                                            <button title="Ver Detalle" (click)="abrirModalDetalle(detalleModal, solicitud)"
                                                 class="btn btn-info me-1 mb-1">
-                                                <i class="fa fa-info-circle"></i>
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                            <button title="Cambiar Estado" (click)="abrirModalCambioEstado(cambioEstadoModal, solicitud)"
+                                                class="btn btn-warning me-1 mb-1">
+                                                <i class="fa fa-edit"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 </tbody>
                                 <tfoot *ngIf="arrayListSolicitudes.length === 0">
                                     <tr>
-                                        <td colspan="11" class="text-center">No hay solicitudes que coincidan con los
+                                        <td colspan="12" class="text-center">No hay solicitudes que coincidan con los
                                             filtros.</td>
                                     </tr>
                                 </tfoot>
@@ -119,69 +125,86 @@
                             </div>
                         </div>
                     </div>
+
+      
+
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Detalle y Cambio de Estado -->
-<ng-template #modalDetalleEstado let-modal>
+<!-- Modal de Detalle -->
+<ng-template #detalleModal let-modal>
     <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">Detalle de Solicitud y Cambio de Estado</h4>
+        <h4 class="modal-title">Detalle de Solicitud</h4>
         <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
     </div>
     <div class="modal-body">
-        <div class="mb-3">
-            <strong>
-                <label for="codigoDetalle" class="form-label me-2">Código:</label>
-                <i class="fas fa-hashtag "></i> {{ formulario?.codigo}}
-            </strong>
-        </div>
-        <div class="mb-3">
-            <label for="montoDetalle" class="form-label">Monto:</label>
-            <input type="text" [value]="formulario?.monto | currency" class="form-control" readonly />
-        </div>
-        <div class="mb-3">
-            <label for="plazoMesesDetalle" class="form-label">Plazo (Meses):</label>
-            <input type="text" [value]="formulario?.plazoMeses" class="form-control" readonly />
-        </div>
-        <div class="mb-3">
-            <label for="ingresosMensualDetalle" class="form-label">Ingresos Mensual:</label>
-            <input type="text" [value]="formulario?.ingresosMensual | currency" class="form-control" readonly />
-        </div>
-        <div class="mb-3">
-            <label for="antiguedadLaboralDetalle" class="form-label">Antigüedad Laboral (Meses):</label>
-            <input type="text" [value]="formulario?.antiguedadLaboral" class="form-control" readonly />
-        </div>
-        <div class="mb-3">
-            <label for="estadoActualDetalle" class="form-label">Estado Actual:</label>
-            <input type="text" [value]="obtenerDescripcionEstado(formulario?.estado_Id)" class="form-control"
-                readonly />
-        </div>
-        <div class="mb-3">
-            <label for="usuarioDetalle" class="form-label">Usuario:</label>
-            <input type="text" [value]="formulario?.nombre_Usuario || '-'" class="form-control" readonly />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Cambiar Estado a:</label>
-            <div *ngFor="let estado of arrayListEstados" class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="nuevoEstado" id="estado{{estado.id}}"
-                    [value]="estado.id" [(ngModel)]="formulario.estado_Id"
-                    [checked]="formulario.estado_Id === estado.id" />
-                <label class="form-check-label" for="estado{{estado.id}}">{{ estado.descripcion }}</label>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Código:</label>
+                <p>{{ formulario.codigo }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Monto:</label>
+                <p>S/ {{ formulario.monto | number:'1.2-2' }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Plazo (Meses):</label>
+                <p>{{ formulario.plazoMeses }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ingresos Mensuales:</label>
+                <p>S/ {{ formulario.ingresosMensual | number:'1.2-2' }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Antigüedad Laboral:</label>
+                <p>{{ formulario.antiguedadLaboral }} años</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Estado:</label>
+                <p>{{ obtenerDescripcionEstado(formulario.estado_Id) }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Fecha de Registro:</label>
+                <p>{{ formulario.fechaRegistro | date:'dd/MM/yyyy HH:mm:ss' }}</p>
             </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel')">
-            <i class="fa fa-times"></i> Cerrar
+        <button type="button" class="btn btn-primary" (click)="imprimirDetalleSolicitud(formulario)">
+            <i class="fas fa-print"></i> Imprimir
         </button>
-        <button type="button" class="btn btn-info me-2" (click)="imprimirDetalleSolicitud(formulario)">
-            <i class="fa fa-print"></i> Imprimir
+        <button type="button" class="btn btn-light" (click)="modal.close('Close click')">
+            Cerrar
         </button>
+    </div>
+</ng-template>
+
+<!-- Modal de Cambio de Estado -->
+<ng-template #cambioEstadoModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title">Cambiar Estado de Solicitud</h4>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <label for="estado" class="form-label">Estado:</label>
+            <select class="form-select" [(ngModel)]="formulario.estado_Id" id="estado">
+                <option [ngValue]="0" hidden disabled selected>Seleccione...</option>
+                <option *ngFor="let estado of arrayListEstados" [ngValue]="estado.id">
+                    {{ estado.descripcion }}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
         <button type="button" class="btn btn-primary" (click)="cambiarEstadoSolicitud()">
-            <i class="fa fa-save"></i> Guardar Cambio de Estado
+            <i class="fa fa-save"></i> Guardar
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close('Close click')">
+            Cerrar
         </button>
     </div>
 </ng-template>

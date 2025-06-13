@@ -67,5 +67,12 @@ namespace es_solicitudes.Services.contract
         /// <param name="filtros">Filtros para la búsqueda.</param>
         /// <returns>Lista de solicitudes.</returns>
         Task<List<SolicitudType>> ObtenerPorFiltros(FiltrosSolicitudType filtros);
+
+        /// <summary>
+        /// Obtiene el historial de auditoría de solicitudes.
+        /// </summary>
+        /// <param name="filtros">Filtros para la búsqueda del historial de auditoría.</param>
+        /// <returns>Lista de registros de historial de auditoría.</returns>
+        Task<List<HistorialAuditoriaType>> ObtenerHistorialAuditoria(FiltrosHistorialAuditoriaType filtros);
     }
 }

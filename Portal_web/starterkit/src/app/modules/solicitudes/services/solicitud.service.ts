@@ -5,6 +5,8 @@ import { catchError } from "rxjs/operators";
 import { SolicitudType } from "../interfaces/solicitud.interface";
 import { FiltrosSolicitudType } from "../interfaces/filtros-solicitud.interface";
 import { CambiarEstadoSolicitudType } from "../interfaces/cambiar-estado-solicitud.interface";
+import { FiltrosHistorialAuditoriaType } from "../interfaces/historial-auditoria.interface";
+import { HistorialAuditoriaType } from "../interfaces/historial-auditoria.interface";
 
 @Injectable({
   providedIn: "root",
@@ -101,6 +103,14 @@ export class SolicitudService {
   obtenerSolicitudesPorFiltros(filtros: FiltrosSolicitudType): Observable<SolicitudType[]> {
     return this.http
       .post<SolicitudType[]>(`${this.apiUrl}/filtros`, filtros, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(catchError(this.handleError));
+  }
+
+  obtenerHistorialAuditoria(filtros: FiltrosHistorialAuditoriaType): Observable<HistorialAuditoriaType[]> {
+    return this.http
+      .post<HistorialAuditoriaType[]>(`${this.apiUrl}/historial-auditoria`, filtros, {
         headers: this.getAuthHeaders(),
       })
       .pipe(catchError(this.handleError));

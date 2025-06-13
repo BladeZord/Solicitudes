@@ -12,22 +12,26 @@ type ToastType = "success" | "error" | "info" | "warning";
 export class LogicaComunService {
   constructor(private toastr: ToastrService) {}
 
-  mostrarMensaje(tipo: ToastType, mensaje: string, titulo?: string): void {
+  mostrarMensaje(
+    tipo: ToastType,
+    mensaje: string,
+    titulo: string = ""
+  ): void {
     switch (tipo) {
       case "success":
-        this.toastr.success(mensaje, titulo || "Éxito");
+        this.toastr.success(mensaje, titulo);
         break;
       case "error":
-        this.toastr.error(mensaje, titulo || "Error");
+        this.toastr.error(mensaje, titulo);
         break;
       case "info":
-        this.toastr.info(mensaje, titulo || "Info");
+        this.toastr.info(mensaje, titulo);
         break;
       case "warning":
-        this.toastr.warning(mensaje, titulo || "Atención");
+        this.toastr.warning(mensaje, titulo);
         break;
       default:
-        this.toastr.show(mensaje, titulo || "");
+        this.toastr.info(mensaje, titulo);
         break;
     }
   }
@@ -82,56 +86,77 @@ export class LogicaComunService {
     FileSaver.saveAs(dataBlob, fileName);
   }
 
-  exportarPDF(nombre: string, titulos: string[], data: any[]): void {
+  /**
+   * Exporta datos a un archivo PDF con un formato personalizado.
+   * Permite agregar un encabezado de texto antes de la tabla y manejar formatos de tabla o formulario.
+   * @param filename Nombre del archivo PDF.
+   * @param headerText Texto que se mostrará en el encabezado del documento (opcional).
+   * @param columns Columnas de la tabla (solo para formato de tabla).
+   * @param data Datos a exportar. Puede ser un array de objetos para tabla o un objeto para formulario.
+   * @param isFormatoTabla Booleano que indica si se debe exportar como tabla (true) o como formulario (false).
+   */
+  exportarPDFPersonalizado(
+    filename: string,
+    headerText: string[] = [],
+    columns: any[] = [],
+    data: any, // data puede ser un array de objetos para tabla o un objeto para formulario
+    isFormatoTabla: boolean = true
+  ): void {
     const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 20;
-    const startX = margin;
-    let startY = margin;
+    let yOffset = 15; // Posición inicial Y para el contenido
 
-    // Configuración de estilos
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.setTextColor(31, 78, 120); // Color azul oscuro
-
-    // Título del reporte
-    const titulo = nombre.toUpperCase();
-    const tituloWidth = doc.getTextWidth(titulo);
-    doc.text(titulo, (pageWidth - tituloWidth) / 2, startY);
-    startY += 10;
-
-    // Información del usuario y fecha
-    const userData = localStorage.getItem("usuario");
-    const usuario = userData ? JSON.parse(userData).nombre : "Usuario";
-    const fecha = new Date().toLocaleDateString();
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(`Usuario: ${usuario}`, startX, startY);
-    doc.text(`Fecha: ${fecha}`, pageWidth - margin - 40, startY);
-    startY += 10;
-
-    // Tabla de datos
-    autoTable(doc, {
-      startY: startY,
-      head: [titulos],
-      body: data.map(item => titulos.map(titulo => item[titulo])),
-      theme: 'grid',
-      headStyles: {
-        fillColor: [31, 78, 120],
-        textColor: 255,
-        fontSize: 10,
-        fontStyle: 'bold'
-      },
-      styles: {
-        fontSize: 9,
-        cellPadding: 3
-      },
-      margin: { top: startY }
+    // Agregar texto de encabezado
+    headerText.forEach(text => {
+      doc.text(text, 14, yOffset);
+      yOffset += 7; // Espacio entre líneas de texto
     });
 
-    // Guardar el PDF
-    doc.save(`${nombre}-${new Date().toISOString().slice(0, 10)}.pdf`);
+    // Espacio antes de la tabla/formulario
+    yOffset += 10;
+
+    if (isFormatoTabla) {
+      // Formato de tabla
+      autoTable(doc, {
+        head: [columns.map((col: any) => col.header)], // Solo los headers para el head
+        body: data.map((row: any) => columns.map((col: any) => row[col.dataKey])),
+        startY: yOffset,
+        didDrawPage: (data) => {
+          // Pie de página con número de página
+          doc.text(
+            `Página ${data.pageNumber}`,
+            doc.internal.pageSize.width - 20,
+            doc.internal.pageSize.height - 10,
+            { align: "right" }
+          );
+        },
+      });
+    } else {
+      // Formato de formulario (key-value pairs)
+      for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          doc.text(`${key}: ${data[key]}`, 14, yOffset);
+          yOffset += 7;
+          // Si el contenido excede el tamaño de la página, añadir nueva página
+          if (yOffset > doc.internal.pageSize.height - 20) {
+            doc.addPage();
+            yOffset = 15; // Resetear Y para la nueva página
+          }
+        }
+      }
+    }
+
+    doc.save(`${filename}.pdf`);
+  }
+
+  /**
+   * Exporta datos a un archivo PDF (método original, ahora llama a exportarPDFPersonalizado para compatibilidad).
+   * @param filename Nombre del archivo PDF.
+   * @param titulos Títulos de las columnas.
+   * @param data Datos a exportar.
+   */
+  exportarPDF(filename: string, titulos: string[], data: any[]): void {
+    const columns = titulos.map(title => ({ header: title, dataKey: title }));
+    this.exportarPDFPersonalizado(filename, [], columns, data, true);
   }
 
   imprimirTabla(nombre: string, encabezadoTabla: string[], data: any[]): void {
@@ -284,7 +309,7 @@ export class LogicaComunService {
     }
 
     // Validar si es letra, número, espacio o caracteres especiales permitidos
-    const pattern = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s,\.()]*$/;
+    const pattern = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s,.\(\)]*$/;
     if (!pattern.test(event.key)) {
       event.preventDefault();
       return;

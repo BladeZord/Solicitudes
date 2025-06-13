@@ -471,5 +471,50 @@ namespace es_solicitudes.Repository.impl
                 throw;
             }
         }
+
+        /// <summary>
+        /// Obtiene el historial de auditoría por filtros.
+        /// </summary>
+        /// <param name="filtros">Filtros de búsqueda.</param>
+        /// <returns>Lista de registros de auditoría que cumplen con los filtros.</returns>
+        public async Task<List<HistorialAuditoriaType>> ObtenerHistorialAuditoria(FiltrosHistorialAuditoriaType filtros)
+        {
+            const string operation = nameof(ObtenerHistorialAuditoria);
+            using var scope = _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["solicitudId"] = filtros.SolicitudId,
+                ["usuarioId"] = filtros.UsuarioId,
+                ["estadoAnteriorId"] = filtros.EstadoAnteriorId,
+                ["estadoActualId"] = filtros.EstadoActualId,
+                ["fechaInicio"] = filtros.FechaInicio,
+                ["fechaFin"] = filtros.FechaFin
+            });
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+
+                var parameters = new
+                {
+                    SolicitudId = filtros.SolicitudId,
+                    UsuarioId = filtros.UsuarioId,
+                    EstadoAnteriorId = filtros.EstadoAnteriorId,
+                    EstadoActualId = filtros.EstadoActualId,
+                    FechaInicio = filtros.FechaInicio,
+                    FechaFin = filtros.FechaFin
+                };
+
+                var result = (await connection.QueryAsync<HistorialAuditoriaType>("sp_ConsultarHistorialAuditoria", parameters, commandType: System.Data.CommandType.StoredProcedure)).ToList();
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
     }
 }
