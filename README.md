@@ -95,7 +95,10 @@ Solicitudes/
 ```bash
 git clone [URL_DEL_REPOSITORIO]
 cd Solicitudes
+git checkout dev
 ```
+
+**⚠️ Importante**: El contenido del proyecto se encuentra en la rama `dev` del repositorio de GitHub. Asegúrate de cambiar a esta rama después de clonar.
 
 ### Paso 2: Configurar Variables de Entorno
 Antes de ejecutar los servicios, necesitas configurar las cadenas de conexión:
