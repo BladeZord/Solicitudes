@@ -73,7 +73,7 @@ namespace es_usuario.Controller.impl
                     Token = token,
                     Correo = usuario.Correo,
                     Nombre = usuario.Nombre,
-                    Roles = usuario.Roles.Select(r => r.Rol_Descripcion).ToList()
+                    Roles = usuario.Roles
                 });
             }
             catch (ServiceException ex)
@@ -108,7 +108,7 @@ namespace es_usuario.Controller.impl
             // Agregar cada rol como un claim separado
             foreach (var rol in usuario.Roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, rol.Rol_Descripcion));
+                claims.Add(new Claim(ClaimTypes.Role, rol));
             }
 
             var token = new JwtSecurityToken(
@@ -519,6 +519,65 @@ namespace es_usuario.Controller.impl
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error interno al quitar rol: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Actualiza la contraseña de un usuario.
+        /// </summary>
+        /// <param name="actualizarContrasenia">Datos para actualizar la contraseña.</param>
+        /// <returns>Resultado de la operación.</returns>
+        /// <response code="200">Contraseña actualizada exitosamente</response>
+        /// <response code="400">Datos de entrada inválidos</response>
+        /// <response code="404">Usuario no encontrado</response>
+        /// <response code="500">Error interno del servidor</response>
+        [Authorize]
+        [HttpPut("contrasenia")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [Produces(MimeType.JSON)]
+        public async Task<ActionResult<object>> ActualizarContrasenia([FromBody] ActualizarContraseniaType actualizarContrasenia)
+        {
+            using var scope = _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["usuarioId"] = actualizarContrasenia.Id
+            });
+
+            try
+            {
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationStart,
+                    "ActualizarContrasenia",
+                    actualizarContrasenia.Id
+                );
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { Success = false, Message = ApiConstants.ErrorMessages.InvalidInput, Errors = ModelState.Values.SelectMany(v => v.Errors) });
+                }
+
+                var result = await _service.ActualizarContrasenia(actualizarContrasenia.Id, actualizarContrasenia.NuevaContrasenia);
+
+                _logger.LogInformation(
+                    ApiConstants.LogMessages.OperationEnd,
+                    "ActualizarContrasenia",
+                    actualizarContrasenia.Id,
+                    "Success"
+                );
+
+                return Ok(new { Success = true, Message = result });
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, "Error de validación al actualizar contraseña: {Message}", ex.Message);
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error interno al actualizar contraseña: {Message}", ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Success = false, Message = "Error interno del servidor" });
             }
         }

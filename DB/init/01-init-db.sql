@@ -355,3 +355,45 @@ BEGIN
     WHERE Id = @SolicitudId;
 END
 GO 
+
+
+CREATE PROCEDURE dbo.sp_ConsultarHistorialAuditoria
+    @SolicitudId INT = 0,
+    @UsuarioId INT = 0,
+    @EstadoAnteriorId INT = 0,
+    @EstadoActualId INT = 0,
+    @FechaInicio DATETIME2 = NULL,
+    @FechaFin DATETIME2 = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        log.Id AS LogId,
+        log.Fecha_registro,
+        log.Accion,
+        ISNULL(estadoAnterior.Descripcion, 'N/A') AS EstadoAnterior,
+        ISNULL(estadoActual.Descripcion, 'N/A') AS EstadoActual,
+        u.Id AS UsuarioId,
+        CONCAT(u.Nombre, ' ', ISNULL(u.Apellidos, '')) AS NombreUsuario,
+        s.Id AS SolicitudId,
+        s.Codigo AS CodigoSolicitud,
+        s.Monto,
+        s.Plazo_meses AS PlazoMeses,
+        s.Fecha_registro AS FechaSolicitud
+    FROM 
+        dbo.Log_auditoria log
+        INNER JOIN dbo.Solicitudes s ON s.Id = log.Solicitud_Id
+        INNER JOIN dbo.Usuarios u ON u.Id = log.Usuario_Id
+        LEFT JOIN dbo.Catalogos estadoAnterior ON estadoAnterior.Id = log.Estado_anterior_Id
+        LEFT JOIN dbo.Catalogos estadoActual ON estadoActual.Id = log.Estado_actual_Id
+    WHERE
+        (@SolicitudId = 0 OR log.Solicitud_Id = @SolicitudId)
+        AND (@UsuarioId = 0 OR log.Usuario_Id = @UsuarioId)
+        AND (@EstadoAnteriorId = 0 OR log.Estado_anterior_Id = @EstadoAnteriorId)
+        AND (@EstadoActualId = 0 OR log.Estado_actual_Id = @EstadoActualId)
+        AND (@FechaInicio IS NULL OR log.Fecha_registro >= @FechaInicio)
+        AND (@FechaFin IS NULL OR log.Fecha_registro <= @FechaFin)
+    ORDER BY 
+        log.Fecha_registro DESC;
+END;

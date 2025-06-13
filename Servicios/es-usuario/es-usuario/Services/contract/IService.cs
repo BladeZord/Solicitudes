@@ -45,6 +45,14 @@ namespace es_usuario.Services.contract
         /// <returns>Retorna mensaje acorde al resultado de la operación.</returns>
         Task<string> Eliminar(int id);
 
+        /// <summary>
+        /// Actualiza la contraseña de un usuario.
+        /// </summary>
+        /// <param name="id">Identificador del usuario.</param>
+        /// <param name="nuevaContrasenia">Nueva contraseña del usuario.</param>
+        /// <returns>Mensaje con el resultado de la operación.</returns>
+        Task<string> ActualizarContrasenia(int id, string nuevaContrasenia);
+
         // Nuevos métodos para Usuario_Roles
         Task<List<UsuarioRolType>> ObtenerRolesPorUsuario(int usuarioId);
         Task<bool> AsignarRolAUsuario(UsuarioRolType usuarioRol);

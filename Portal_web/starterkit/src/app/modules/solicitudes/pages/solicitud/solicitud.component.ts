@@ -8,6 +8,7 @@ import { CatalogoService } from "../../../mantenimiento/services/catalogo.servic
 import { CatalogoType } from "../../../mantenimiento/interfaces/catalogo.interface";
 import { Observable, throwError } from "rxjs";
 import { tap, catchError } from "rxjs/operators";
+import { AuthService } from "../../../auth/Services/auth.service";
 
 @Component({
   selector: "app-solicitud",
@@ -24,14 +25,20 @@ export class SolicitudComponent implements OnInit, OnDestroy {
   page = 1;
   pageSize = 5;
 
+  // Propiedades para control de roles
+  isAnalista: boolean = false;
+  isSolicitante: boolean = false;
+
   constructor(
     private _solicitudService: SolicitudService,
     private _catalogoService: CatalogoService,
     public _utilService: LogicaComunService,
-    private _modalService: NgbModal
+    private _modalService: NgbModal,
+    private _authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.verificarRoles();
     this.obtenerDataSolicitudes();
     this.obtenerEstados().subscribe();
     this.reiniciarFormulario();
@@ -345,5 +352,65 @@ export class SolicitudComponent implements OnInit, OnDestroy {
   obtenerDescripcionEstado(estadoId: number): string {
     const estado = this.arrayListEstados.find((e) => e.id === estadoId);
     return estado ? estado.descripcion : "";
+  }
+
+  /**
+   * Verifica los roles del usuario actual
+   */
+  private verificarRoles(): void {
+    this.isAnalista = this._authService.hasRole('ANALISTA');
+    this.isSolicitante = this._authService.hasRole('SOLICITANTE');
+  }
+
+  /**
+   * Verifica si el usuario puede editar una solicitud
+   */
+  puedeEditarSolicitud(solicitud: SolicitudType): boolean {
+    // Los analistas pueden editar cualquier solicitud
+    if (this.isAnalista) return true;
+    
+    // Los solicitantes solo pueden editar sus propias solicitudes
+    if (this.isSolicitante) {
+      const userData = localStorage.getItem("usuario");
+      if (userData) {
+        const user = JSON.parse(userData);
+        return solicitud.usuario_Id === user.id;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Verifica si el usuario puede eliminar una solicitud
+   */
+  puedeEliminarSolicitud(solicitud: SolicitudType): boolean {
+    // Los analistas pueden eliminar cualquier solicitud
+    if (this.isAnalista) return true;
+    
+    // Los solicitantes solo pueden eliminar sus propias solicitudes
+    if (this.isSolicitante) {
+      const userData = localStorage.getItem("usuario");
+      if (userData) {
+        const user = JSON.parse(userData);
+        return solicitud.usuario_Id === user.id;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Verifica si el usuario puede crear nuevas solicitudes
+   */
+  puedeCrearSolicitud(): boolean {
+    return this.isSolicitante || this.isAnalista;
+  }
+
+  /**
+   * Verifica si el usuario puede exportar datos
+   */
+  puedeExportar(): boolean {
+    return this.isAnalista;
   }
 }

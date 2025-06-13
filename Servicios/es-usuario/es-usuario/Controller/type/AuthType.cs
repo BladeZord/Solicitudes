@@ -51,4 +51,22 @@ namespace es_usuario.Controller.type
         /// </summary>
         public List<string> Roles { get; set; } = new List<string>();
     }
+
+    /// <summary>
+    /// Representa los datos para actualizar la contraseña de un usuario.
+    /// </summary>
+    public class ActualizarContraseniaType
+    {
+        /// <summary>
+        /// Identificador único del usuario.
+        /// </summary>
+        [Required]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Nueva contraseña del usuario.
+        /// </summary>
+        [Required]
+        public string NuevaContrasenia { get; set; } = string.Empty;
+    }
 } 

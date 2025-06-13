@@ -3,6 +3,7 @@ import { Routes, RouterModule } from "@angular/router";
 
 import { FullComponent } from "./layouts/full/full.component";
 import { BlankComponent } from "./layouts/blank/blank.component";
+import { AuthGuard } from "./modules/auth/guards/auth.guard";
 
 export const Approutes: Routes = [
   {
@@ -24,6 +25,7 @@ export const Approutes: Routes = [
   {
     path: "",
     component: FullComponent,
+    // canActivate: [AuthGuard], // Comentado temporalmente para debug
     children: [
       {
         path: "starter",

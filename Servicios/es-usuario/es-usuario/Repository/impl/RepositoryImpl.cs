@@ -55,7 +55,7 @@ namespace es_usuario.Repository.impl
                         u.Domicilio,
                         u.Telefono,
                         r.Id as Rol_Id,
-                        r.Descripcion as Rol_Descripcion
+                        r.codigo as Rol_Descripcion
                     FROM Usuarios u
                     LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
                     LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
@@ -70,12 +70,12 @@ namespace es_usuario.Repository.impl
                         if (!usuarioDict.TryGetValue(usuario.Id, out var usuarioEntry))
                         {
                             usuarioEntry = usuario;
-                            usuarioEntry.Roles = new List<RolType>();
+                            usuarioEntry.Roles = new List<string>();
                             usuarioDict.Add(usuario.Id, usuarioEntry);
                         }
                         if (rol != null)
                         {
-                            usuarioEntry.Roles.Add(rol);
+                            usuarioEntry.Roles.Add(rol.Rol_Descripcion);
                         }
                         return usuarioEntry;
                     },
@@ -115,7 +115,7 @@ namespace es_usuario.Repository.impl
                         u.Domicilio,
                         u.Telefono,
                         r.Id as Rol_Id,
-                        r.Descripcion as Rol_Descripcion
+                        r.codigo as Rol_Descripcion
                     FROM Usuarios u
                     LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
                     LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
@@ -130,12 +130,12 @@ namespace es_usuario.Repository.impl
                         if (!usuarioDict.TryGetValue(usuario.Id, out var usuarioEntry))
                         {
                             usuarioEntry = usuario;
-                            usuarioEntry.Roles = new List<RolType>();
+                            usuarioEntry.Roles = new List<string>();
                             usuarioDict.Add(usuario.Id, usuarioEntry);
                         }
                         if (rol != null)
                         {
-                            usuarioEntry.Roles.Add(rol);
+                            usuarioEntry.Roles.Add(rol.Rol_Descripcion);
                         }
                         return usuarioEntry;
                     },
@@ -219,6 +219,24 @@ namespace es_usuario.Repository.impl
                     SELECT SCOPE_IDENTITY();";
 
                 int id = await connection.ExecuteScalarAsync<int>(insertQuery, entityType, transaction);
+
+                // Buscar el catálogo con código "SOLICITANTE" y asignar el rol por defecto
+                const string buscarSolicitanteQuery = @"
+                    SELECT Id FROM Catalogos WHERE Codigo = 'SOLICITANTE'";
+                
+                var rolSolicitanteId = await connection.ExecuteScalarAsync<int?>(buscarSolicitanteQuery, null, transaction);
+                
+                if (rolSolicitanteId.HasValue)
+                {
+                    const string insertRolQuery = @"
+                        INSERT INTO Usuario_Roles (Usuario_Id, Rol_Id)
+                        VALUES (@Usuario_Id, @Rol_Id)";
+                    
+                    await connection.ExecuteAsync(insertRolQuery, 
+                        new { Usuario_Id = id, Rol_Id = rolSolicitanteId.Value }, 
+                        transaction);
+                }
+
                 transaction.Commit();
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
@@ -314,20 +332,21 @@ namespace es_usuario.Repository.impl
                 var connection = await _dbConexion.ObtenerConexion();
 
                 var sql = @"
-                    SELECT 
-                        u.Id,
-                        u.Nombre,
-                        u.Apellidos,
-                        u.Correo,
-                        u.Contrasenia,
-                        u.Domicilio,
-                        u.Telefono,
-                        r.Id as Rol_Id,
-                        r.codigo as Rol_Descripcion
-                    FROM Usuarios u
-                    LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
-                    LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id
-                    WHERE u.Correo = @Correo AND u.Contrasenia = @Contrasenia";
+                            SELECT 
+                                u.Id,
+                                u.Nombre,
+                                u.Apellidos,
+                                u.Correo,
+                                u.Contrasenia,
+                                u.Domicilio,
+                                u.Telefono,
+                                r.Id as Rol_Id,
+                                r.codigo as Rol_Descripcion
+                            FROM Usuarios u
+                            LEFT JOIN Usuario_Roles ur ON ur.Usuario_Id = u.Id
+                            LEFT JOIN Catalogos r ON r.Id = ur.Rol_Id AND r.tipo = 'TIPO_PERSONA'
+                            WHERE u.Correo = @Correo AND u.Contrasenia = @Contrasenia";
+
 
                 var usuarioDict = new Dictionary<int, UsuarioType>();
                 
@@ -339,12 +358,13 @@ namespace es_usuario.Repository.impl
                         {
                             usuarioEntry = usuario;
                             usuarioEntry.Nombre = $"{usuario.Nombre} {usuario.Apellidos}".Trim();
-                            usuarioEntry.Roles = new List<RolType>();
-                            usuarioDict.Add(usuario.Id, usuarioEntry);
+                            usuarioEntry.Roles = new List<string>();
+                            usuarioDict[usuario.Id] = usuarioEntry;
+
                         }
                         if (rol != null)
                         {
-                            usuarioEntry.Roles.Add(rol);
+                            usuarioEntry.Roles.Add(rol.Rol_Descripcion);
                         }
                         return usuarioEntry;
                     },
@@ -424,6 +444,35 @@ namespace es_usuario.Repository.impl
                 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
                 return result > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Actualiza la contraseña de un usuario.
+        /// </summary>
+        /// <param name="id">Identificador del usuario.</param>
+        /// <param name="nuevaContrasenia">Nueva contraseña del usuario.</param>
+        /// <returns>True si la contraseña fue actualizada exitosamente, false en caso contrario.</returns>
+        public async Task<bool> ActualizarContrasenia(int id, string nuevaContrasenia)
+        {
+            const string operation = nameof(ActualizarContrasenia);
+            using var scope = _logger.BeginScope(new Dictionary<string, object> { ["id"] = id });
+            _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation);
+
+            try
+            {
+                var connection = await _dbConexion.ObtenerConexion();
+
+                var sql = @"UPDATE Usuarios SET Contrasenia = @Contrasenia WHERE Id = @Id";
+                var rows = await connection.ExecuteAsync(sql, new { Id = id, Contrasenia = nuevaContrasenia });
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation);
+                return rows > 0;
             }
             catch (Exception ex)
             {

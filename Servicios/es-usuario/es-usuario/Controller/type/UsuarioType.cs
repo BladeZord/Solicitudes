@@ -57,7 +57,7 @@ namespace es_usuario.Controller.type
         /// Lista de roles del usuario.
         /// </summary>
         [NotMapped]
-        public List<RolType>? Roles { get; set; } = new List<RolType>();
+        public List<string>? Roles { get; set; } = new List<string>();
     }
 
     /// <summary>

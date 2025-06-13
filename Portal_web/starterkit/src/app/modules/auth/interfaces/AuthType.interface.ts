@@ -6,13 +6,8 @@ export interface AuthResponseType {
   roles: string[];
 }
 
-export interface RolType {
-  id: number;
-  descripcion: string;
-}
-
 export interface AuthRequestType {
   correo: string;
   contrasenia: string;
-  perfil?: string;
+  // perfil?: string;
 }

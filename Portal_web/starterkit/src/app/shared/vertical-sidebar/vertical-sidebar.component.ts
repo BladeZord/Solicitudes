@@ -46,7 +46,8 @@ export class VerticalSidebarComponent {
     );
     this.user = usuario?.nombre || "";
     this.menuServise.items.subscribe((menuItems) => {
-      this.sidebarnavItems = menuItems;
+      // Filtrar elementos del menú según los roles del usuario
+      this.sidebarnavItems = this.filtrarMenuPorRol(menuItems);
 
       // Active menu
       this.sidebarnavItems.filter((m) =>
@@ -58,6 +59,29 @@ export class VerticalSidebarComponent {
       );
       this.addExpandClass(this.path);
     });
+  }
+
+  /**
+   * Filtra los elementos del menú según los roles del usuario
+   */
+  private filtrarMenuPorRol(menuItems: RouteInfo[]): RouteInfo[] {
+    const rutasPermitidas = this._authService.getPermittedRoutes();
+    
+    return menuItems.map(item => {
+      // Filtrar submenús según las rutas permitidas
+      const submenuFiltrado = item.submenu.filter(subItem => 
+        rutasPermitidas.includes(subItem.path)
+      );
+      
+      // Solo incluir el elemento si tiene submenús permitidos
+      if (submenuFiltrado.length > 0) {
+        return {
+          ...item,
+          submenu: submenuFiltrado
+        };
+      }
+      return null;
+    }).filter(item => item !== null) as RouteInfo[];
   }
 
   addExpandClass(element: any) {

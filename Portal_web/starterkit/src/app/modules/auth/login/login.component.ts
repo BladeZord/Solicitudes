@@ -42,7 +42,6 @@ export class LoginComponent implements OnInit {
     this.formulario = {
       contrasenia: "",
       correo: "",
-      perfil: "",
     };
   }
 
@@ -56,10 +55,7 @@ export class LoginComponent implements OnInit {
       domicilio: "",
       telefono: "",
       roles: [
-        {
-          id: 0,
-          descripcion: "",
-        },
+       ""
       ],
     };
   }
@@ -75,27 +71,45 @@ export class LoginComponent implements OnInit {
       return;
     }
 
+    console.log('Iniciando sesión con:', this.formulario);
+
     this._loginService.login(this.formulario).subscribe({
       next: (response) => {
+        console.log('Respuesta del servidor:', response);
+        
         if (!response) {
           this._utilService.mostrarMensaje(
             "warning",
             "Inicio de sesión fallido"
           );
-
           return;
         }
+
+        // Validar que la respuesta tenga los campos necesarios
+        if (!response.id || !response.token || !response.roles) {
+          this._utilService.mostrarMensaje(
+            "error",
+            "Respuesta del servidor incompleta"
+          );
+          return;
+        }
+
         this._utilService.mostrarMensaje("success", "Inicio de sesión exitoso");
 
         localStorage.setItem("usuario", JSON.stringify(response));
-        this._router.navigate(["/starter"]);
+        
+        console.log('Usuario guardado en localStorage:', response);
+        console.log('Roles del usuario:', response.roles);
+        
+        // Redirigir según el rol del usuario
+        this._loginService.redirectToHome();
       },
       error: (err: HttpErrorResponse) => {
-        console.error(err);
+        console.error('Error en login:', err);
         if (err.status >= 400 && err.status < 500) {
-          this._utilService.mostrarMensaje("warning", err.error.message);
+          this._utilService.mostrarMensaje("warning", err.error.message || "Error de autenticación");
         } else {
-          this._utilService.mostrarMensaje("error", err.error.message);
+          this._utilService.mostrarMensaje("error", err.error.message || "Error del servidor");
         }
       },
     });

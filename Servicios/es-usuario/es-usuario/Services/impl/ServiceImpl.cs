@@ -287,5 +287,55 @@ namespace es_usuario.Services.impl
                 throw new ServiceException($"Error al quitar rol del usuario: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Actualiza la contraseña de un usuario.
+        /// </summary>
+        /// <param name="id">Identificador del usuario.</param>
+        /// <param name="nuevaContrasenia">Nueva contraseña del usuario.</param>
+        /// <returns>Mensaje con el resultado de la operación.</returns>
+        public async Task<string> ActualizarContrasenia(int id, string nuevaContrasenia)
+        {
+            const string operation = nameof(ActualizarContrasenia);
+
+            using var scope = _logger.BeginScope(new Dictionary<string, object>
+            {
+                ["id"] = id
+            });
+
+            try
+            {
+                _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation, new { id });
+
+                // Sanitizar la nueva contraseña
+                var contraseniaSanitizada = SanitizarInput.SanitizarContrasenia(nuevaContrasenia);
+                
+                if (contraseniaSanitizada == null)
+                {
+                    throw new ServiceException("La nueva contraseña no cumple con los requisitos mínimos de seguridad");
+                }
+
+                var resultado = await _repository.ActualizarContrasenia(id, contraseniaSanitizada);
+
+                if (!resultado)
+                {
+                    throw new ServiceException("No se pudo actualizar la contraseña. El usuario no fue encontrado.");
+                }
+
+                _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { id, Status = "Success" });
+
+                return "Contraseña actualizada exitosamente";
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw new ServiceException($"Error al actualizar la contraseña: {ex.Message}");
+            }
+        }
     }
 }

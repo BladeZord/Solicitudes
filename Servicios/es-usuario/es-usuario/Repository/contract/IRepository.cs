@@ -49,6 +49,14 @@ namespace es_usuario.Repository.contract
         /// <returns>Entidad guardada con su usuario y contrañas.</returns>
         Task<UsuarioType> ConsultarPorUsuarioYContrasenia(AuthType AuthParam);
 
+        /// <summary>
+        /// Actualiza la contraseña de un usuario.
+        /// </summary>
+        /// <param name="id">Identificador del usuario.</param>
+        /// <param name="nuevaContrasenia">Nueva contraseña del usuario.</param>
+        /// <returns>True si la contraseña fue actualizada exitosamente, false en caso contrario.</returns>
+        Task<bool> ActualizarContrasenia(int id, string nuevaContrasenia);
+
         // Nuevos métodos para Usuario_Roles
         Task<List<UsuarioRolType>> ObtenerRolesPorUsuario(int usuarioId);
         Task<bool> AsignarRolAUsuario(UsuarioRolType usuarioRol);

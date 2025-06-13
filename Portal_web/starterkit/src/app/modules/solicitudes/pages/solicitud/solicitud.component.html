@@ -5,10 +5,10 @@
         <div class="card-body">
           <div class="row w-100">
             <div class="col-lg-12 mb-2">
-              <button class="btn btn-primary me-1" (click)="nuevoRegistro(modalSolicitud)">
+              <button *ngIf="puedeCrearSolicitud()" class="btn btn-primary me-1" (click)="nuevoRegistro(modalSolicitud)">
                 <i class="fa fa-plus"></i> Nuevo
               </button>
-              <button class="btn btn-secondary" (click)="exportarAExcel()">
+              <button *ngIf="puedeExportar()" class="btn btn-secondary" (click)="exportarAExcel()">
                 <i class="fa fa-file-excel"></i> Exportar
               </button>
             </div>
@@ -52,11 +52,11 @@
                     <td>{{ solicitud?.estado_Descripcion }}</td>
                     <td>{{ solicitud?.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>
-                      <button title="Editar" (click)="editarRegistro(modalSolicitud, solicitud)"
+                      <button *ngIf="puedeEditarSolicitud(solicitud)" title="Editar" (click)="editarRegistro(modalSolicitud, solicitud)"
                         class="btn btn-primary me-1 mb-1">
                         <i class="fa fa-edit"> </i>
                       </button>
-                      <button title="Eliminar" (click)="eliminarRegistro(solicitud.id)" class="btn btn-danger">
+                      <button *ngIf="puedeEliminarSolicitud(solicitud)" title="Eliminar" (click)="eliminarRegistro(solicitud.id)" class="btn btn-danger">
                         <i class="fa fa-trash"> </i>
                       </button>
                     </td>
