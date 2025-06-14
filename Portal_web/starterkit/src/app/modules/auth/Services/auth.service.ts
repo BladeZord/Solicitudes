@@ -3,12 +3,15 @@ import { Injectable } from '@angular/core';
 import { AuthRequestType, AuthResponseType } from '../interfaces/AuthType.interface';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://localhost:7271/v1/es/usuario/login'
+  // private apiUrl = 'https://localhost:7271/v1/es/usuario/login'
+  private apiUrl = `${environment.usuarioUrl}/login`  
+  
 
   // Definición de rutas permitidas por rol
   private rutasPermitidas = {

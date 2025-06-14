@@ -8,35 +8,49 @@ using es_catalogo.Repository.impl;
 using es_catalogo.Services.contract;
 using es_catalogo.Services.impl;
 using es_catalogo.utils;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-
-using Newtonsoft.Json;
-
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
-#region ConfiguraciÛn de conexiÛn local desde appsettings
-// Obtener cadena de conexiÛn directamente desde appsettings.json
+#region Configuraci√≥n de conexi√≥n local desde appsettings
+// Obtener cadena de conexi√≥n directamente desde appsettings.json
 string connectionString = configuration.GetConnectionString("SQLConnection")
-    ?? throw new ServiceException("La cadena de conexiÛn SQLConnection no est· definida");
+    ?? throw new ServiceException("La cadena de conexi√≥n SQLConnection no est√° definida");
 
-Console.WriteLine($"Cadena de conexiÛn usada: {connectionString}");
+Console.WriteLine($"Cadena de conexi√≥n usada: {connectionString}");
 #endregion
+
+// Configuraci√≥n de JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = configuration["Jwt:Issuer"],
+            ValidAudience = configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+        };
+    });
 
 // Registrar servicios
 builder.Services.AddSingleton(new Provider(connectionString));
-builder.Services.AddSingleton<LogUtil>();
 builder.Services.AddControllers();
-builder.Services.AddScoped<IController, ControllerImpl>();
-builder.Services.AddScoped<IService, ServiceImpl>();
-builder.Services.AddScoped<IRepository, RepositoryImpl>();
+builder.Services.AddScoped<IController, ControllerImpl>(); // Capa de Controlador: Interfaz e implementacion del Controlador. Recepta parametros y procesa respuestas 
+builder.Services.AddScoped<IService, ServiceImpl>(); // Capa de Servicio: Interfaz e implementacion del servicio se encarga de aplicar la logica del negocio
+builder.Services.AddScoped<IRepository, RepositoryImpl>(); // Capa de Repository:  Interfaz e implementacion del Repositorio, es decir se comunica con la base de datos mediante acciones o queries
 builder.Services.AddScoped<DbConnectionManager>();
 builder.Services.AddHealthChecks();
 
-// ConfiguraciÛn de Swagger
+// Configuraci√≥n de Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -44,7 +58,32 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = ApiConstants.Routes.ControllerName,
         Version = "v1",
-        Description = "API para la gestiÛn de los catalogos"
+        Description = "API para la gesti√≥n de los catalogos"
+    });
+
+    // Configuraci√≥n de autenticaci√≥n en Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
 
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -55,7 +94,7 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
-// ConfiguraciÛn de CORS
+// Configuraci√≥n de CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("NUXT", builder =>
@@ -66,7 +105,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ConfiguraciÛn JSON
+// Configuraci√≥n JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -90,6 +129,9 @@ if (!app.Environment.IsProduction())
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("NUXT");
 app.UseHttpsRedirection();
+
+// Agregar autenticaci√≥n y autorizaci√≥n
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

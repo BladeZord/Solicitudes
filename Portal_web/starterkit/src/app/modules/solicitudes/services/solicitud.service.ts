@@ -7,32 +7,44 @@ import { FiltrosSolicitudType } from "../interfaces/filtros-solicitud.interface"
 import { CambiarEstadoSolicitudType } from "../interfaces/cambiar-estado-solicitud.interface";
 import { FiltrosHistorialAuditoriaType } from "../interfaces/historial-auditoria.interface";
 import { HistorialAuditoriaType } from "../interfaces/historial-auditoria.interface";
+import { environment } from "src/environments/environment";
+import { AuthResponseType } from "../../auth/interfaces/AuthType.interface";
 
 @Injectable({
   providedIn: "root",
 })
 export class SolicitudService {
-  private apiUrl = "https://localhost:7272/v1/es/solicitudes";
+  // private apiUrl = "https://localhost:7272/v1/es/solicitudes";
+  private apiUrl = `${environment.solicitudUrl}`  
 
   constructor(private http: HttpClient) {}
 
-  private getToken(): string {
-    return localStorage.getItem("token") || "";
+  private getToken(): string | null {
+    const userData = localStorage.getItem("usuario");
+    if (!userData) return null;
+    try {
+      const user = JSON.parse(userData) as AuthResponseType;
+      return user.token;
+    } catch {
+      return null;
+    }
   }
 
   private getAuthHeaders(): HttpHeaders {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found");
     return new HttpHeaders({
       "Content-Type": "application/json",
-      Authorization: `Bearer ${this.getToken()}`,
+      Authorization: `Bearer ${token}`,
     });
   }
 
   private handleError(error: any) {
     if (error.status === 401) {
-      localStorage.removeItem("token");
       localStorage.removeItem("usuario");
       window.location.href = "/login";
     }
+    console.error("API error", error);
     return throwError(() => error);
   }
 

@@ -3,12 +3,14 @@ import { Injectable } from "@angular/core";
 import { AuthResponseType } from "../../auth/interfaces/AuthType.interface";
 import { catchError, Observable, throwError } from "rxjs";
 import { RolType, UsuarioType } from "../interfaces/usuario.inteface";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: "root",
 })
 export class UsuarioService {
-  private apiUrl = "https://localhost:7271/v1/es/usuario";
+  // private apiUrl = "https://localhost:7271/v1/es/usuario";
+  private apiUrl = `${environment.usuarioUrl}`  
 
   constructor(private _http: HttpClient) {}
 
@@ -30,6 +32,15 @@ export class UsuarioService {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     });
+  }
+
+  private handleError(error: any) {
+    if (error.status === 401) {
+      localStorage.removeItem("usuario");
+      window.location.href = "/login";
+    }
+    console.error("API error", error);
+    return throwError(() => error);
   }
 
   crearUsuario(usuario: UsuarioType): Observable<UsuarioType> {
@@ -67,6 +78,14 @@ export class UsuarioService {
       .pipe(catchError(this.handleError));
   }
 
+  cambiarContrasenia(id: number, nuevaContrasenia: string): Observable<string> {
+    return this._http
+      .put<string>(`${this.apiUrl}/contrasenia`, { id, nuevaContrasenia }, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(catchError(this.handleError));
+  }
+
   obtenerRolesPorUsuario(usuarioId: number): Observable<RolType[]> {
     return this._http
       .get<RolType[]>(`${this.apiUrl}/roles/${usuarioId}`, {
@@ -75,30 +94,20 @@ export class UsuarioService {
       .pipe(catchError(this.handleError));
   }
 
-  asignarRol(usuarioRol: RolType): Observable<any> {
+  asignarRol(usuario_Id: number, rol_Id: number): Observable<any> {
     return this._http
-      .post(`${this.apiUrl}/roles`, usuarioRol, {
+      .post(`${this.apiUrl}/roles`, { usuario_Id, rol_Id }, {
         headers: this.getAuthHeaders(),
       })
       .pipe(catchError(this.handleError));
   }
 
-  eliminarRol(usuarioRol: RolType): Observable<any> {
+  desasignarRol(usuario_Id: number, rol_Id: number): Observable<any> {
     return this._http
-      .request("delete", `${this.apiUrl}/roles`, {
-        body: usuarioRol,
+      .delete(`${this.apiUrl}/roles`, {
+        body: { usuario_Id, rol_Id },
         headers: this.getAuthHeaders(),
       })
       .pipe(catchError(this.handleError));
-  }
-
-  private handleError(error: any) {
-    if (error.status === 401) {
-      // Token expirado o inválido
-      localStorage.removeItem("usuario");
-      window.location.href = "/login";
-    }
-    console.error("API error", error);
-    return throwError(() => error);
   }
 }

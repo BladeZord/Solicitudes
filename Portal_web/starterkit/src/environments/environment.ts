@@ -3,9 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  solicitudUrl: 'https://localhost:7272/v1/es/solicitudes', // Servicio de solicitudes
+  catalogoUrl: 'https://localhost:7270/v1/es/catalogo', // Servicio de catálogos
+  usuarioUrl: 'https://localhost:7271/v1/es/usuario' // Servicio de usuarios
 };
-
 /*
  * In development mode, to ignore zone related error stack frames such as
  * `zone.run`, `zoneDelegate.invokeTask` for easier debugging, you can

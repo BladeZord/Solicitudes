@@ -1,6 +1,7 @@
 -- =============================================
 -- Script de inicialización de la base de datos
--- Autor: Sistema de Solicitudes
+-- Autor: Kevin Quito
+-- Aplicación: Sistema de Solicitudes
 -- Fecha: 2025-06-12
 -- Descripción: Script para crear la base de datos y sus objetos
 -- =============================================

@@ -469,8 +469,8 @@ namespace es_usuario.Controller.impl
             }
             catch (ServiceException ex)
             {
-                _logger.LogError(ex, "Error de validación al asignar rol: {Message}", ex.Message);
-                return BadRequest(new { Success = false, Message = ex.Message });
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, "AsignarRolAUsuario", ex.Message);
+                throw;
             }
             catch (Exception ex)
             {

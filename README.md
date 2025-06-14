@@ -82,12 +82,16 @@ Solicitudes/
 
 -- 2. Ejecutar el script de catálogos
 -- Archivo: DB/init/02-init-catalogos.sql
+
+-- 3. Ejecutar el script de usuario inicial este se usara para el acceso al portal como ANALISTA
+-- Archivo: DB/init/03-init-usuario.sql
 ```
 
 **Nota**: Los scripts crearán automáticamente:
 - Base de datos `SolicitudesDB`
 - Tablas: Usuarios, Solicitudes, Catalogos, Log_auditoria, Usuario_Roles
-- Datos iniciales de catálogos
+- Datos iniciales de catálogos y usuario administrador
+- 
 
 ## 🚀 Instalación y Configuración
 
@@ -180,15 +184,16 @@ npm install
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:7001', // Servicio de solicitudes
-  catalogoUrl: 'https://localhost:7002', // Servicio de catálogos
-  usuarioUrl: 'https://localhost:7003' // Servicio de usuarios
+  solicitudUrl: 'https://localhost:7001/v1/es/solicitudes', // Servicio de solicitudes
+  catalogoUrl: 'https://localhost:7002/v1/es/catalogo', // Servicio de catálogos
+  usuarioUrl: 'https://localhost:7003/v1/es/usuario' // Servicio de usuarios
 };
 ```
 
 ### Paso 3: Ejecutar el Portal
 ```bash
 npm start
+ng serve -o
 ```
 
 El portal se abrirá automáticamente en `http://localhost:4200`
