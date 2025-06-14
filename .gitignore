@@ -1,0 +1,56 @@
+# ===== GLOBAL IGNORE =====
+*.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# ===== ANGULAR =====
+/Portal_web/node_modules/
+Portal_web/dist/
+Portal_web/.angular/
+Portal_web/.env
+Portal_web/.env.*.local
+Portal_web/.vscode/
+Portal_web/.npm/
+
+# Angular test results
+Portal_web/coverage/
+Portal_web/.cache/
+Portal_web/.output/
+
+# ===== .NET / C# =====
+## Ignore build output
+**/bin/
+**/obj/
+**/out/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider and VS Code
+.idea/
+.vscode/
+
+## NuGet
+**/packages/
+*.nupkg
+
+## Logs
+*.log
+
+# dotCover
+*.dotCover
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# VS for Mac
+**/.vs/
+**/.vsconfig
+
+# ===== DOCUMENTOS Y DB (no se ignoran) =====
+!DB/
+!Documentos/

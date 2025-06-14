@@ -1,0 +1,11 @@
+﻿Id;Codigo;Descripcion;Padre_Id;Tipo
+2;TIPO_PERSONA;Tipos de personas en el sistema;NULL;NULL
+3;SOLICITANTE;Solicitante del requerimiento;2;TIPO_PERSONA
+5;ANALISTA;Analista de revision;2;TIPO_PERSONA
+6;ESTADO_SOLICITUD;Estado de la solicitud;NULL;NULL
+7;APROBADO;Solicitud aprobada;6;ESTADO_SOLICITUD
+8;RECHAZADO;Solicitud rechazada;6;ESTADO_SOLICITUD
+9;ELIMINADO;Solicitud eliminada;6;ESTADO_SOLICITUD
+10;EN_REVISION;Solicitud en revisión;6;ESTADO_SOLICITUD
+11;PRE_APROBADO;Solicitud pre aprobada;6;ESTADO_SOLICITUD
+17;hola;adios;NULL;

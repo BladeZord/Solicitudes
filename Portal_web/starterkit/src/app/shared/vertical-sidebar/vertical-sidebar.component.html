@@ -1,0 +1,67 @@
+<!-- User profile -->
+<div class="user-profile">
+    <!-- User profile image -->
+    <div class="profile-img">
+        <img src="assets/images/users/user1.jpg" alt="user" />
+    </div>
+    <!-- User profile text-->
+    <div class="profile-text">
+        <a ngbDropdownToggle ngbDropdown href="javascript:void(0)" class="u-dropdown" style="text-decoration: none !important;"> {{ user}}
+            <i class="fa fa-angle-down"></i>
+            <div class="dropdown-menu animated flipInY" ngbDropdownMenu>
+                <!-- <a href="#" class="dropdown-item">
+                    <i class="ti-user"></i> My Profile</a>
+                <a href="#" class="dropdown-item">
+                    <i class="ti-wallet"></i> My Balance</a>
+                <a href="#" class="dropdown-item">
+                    <i class="ti-email"></i> Inbox</a>
+                <div class="dropdown-divider"></div> -->
+                <!-- <a href="#" class="dropdown-item">
+                    <i class="ti-settings"></i> Account Setting</a> -->
+                <div class="dropdown-divider"></div>
+                <a href="javascript:void(0)" (click)="logout()" class="dropdown-item" style="text-decoration: none !important;">
+                    <i class="fa fa-power-off"></i> Cerrar sesión</a>
+            </div>
+        </a>
+    </div>
+</div>
+<nav class="sidebar-nav">
+    <ul id="sidebarnav">
+        <li class="sidebar-item" *ngFor="let sidebarnavItem of sidebarnavItems"
+            [class.active]="isMenuActive(sidebarnavItem)"
+            [class.nav-small-cap]="sidebarnavItem.extralink">
+            
+            <!-- Título de sección -->
+            <div class="nav-small-cap" *ngIf="sidebarnavItem.extralink">
+                <i [ngClass]="[sidebarnavItem.icon]"></i>
+                <span class="hide-menu">{{sidebarnavItem.title | translate}}</span>
+            </div>
+
+            <!-- Elemento de menú -->
+            <a class="sidebar-link" *ngIf="!sidebarnavItem.extralink"
+                [routerLink]="sidebarnavItem.submenu.length === 0 ? [sidebarnavItem.path] : null"
+                [ngClass]="[sidebarnavItem.class]"
+                (click)="sidebarnavItem.submenu.length > 0 ? addExpandClass(sidebarnavItem.title) : handleNotify()"
+                style="text-decoration: none !important;">
+                <i [ngClass]="[sidebarnavItem.icon]"></i>
+                <span class="hide-menu">{{sidebarnavItem.title | translate}}</span>
+            </a>
+
+            <!-- Submenú -->
+            <ul class="collapse first-level" *ngIf="sidebarnavItem.submenu.length > 0"
+                [class.show]="isMenuActive(sidebarnavItem)">
+                <li class="sidebar-item" *ngFor="let subItem of sidebarnavItem.submenu"
+                    [class.active]="isSubMenuActive(subItem)">
+                    <a class="sidebar-link" 
+                        [routerLink]="subItem.submenu.length === 0 ? [subItem.path] : null"
+                        [ngClass]="[subItem.class]"
+                        (click)="subItem.submenu.length > 0 ? addActiveClass(subItem.title) : handleNotify()"
+                        style="text-decoration: none !important;">
+                        <i [ngClass]="[subItem.icon]"></i>
+                        <span class="hide-menu">{{subItem.title | translate}}</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</nav>

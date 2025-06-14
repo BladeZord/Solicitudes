@@ -1,0 +1,268 @@
+import { RouteInfo } from "./vertical-sidebar.metadata";
+
+export const ROUTES: RouteInfo[] = [
+
+  {
+    path: "",
+    title: "Mantenimiento",
+    icon: "icon-speedometer",
+    class: "has-arrow",
+    extralink: false,
+    label: "",
+    labelClass: "",
+    submenu: [
+      {
+        path: "/mantenimiento/catalogo",
+        title: "Catalogos",
+        icon: "icon-book-open",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+      {
+        path: "/mantenimiento/usuario",
+        title: "Usuarios",
+        icon: "icon-book-open",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+    ],
+  },
+  {
+    path: "",
+    title: "Solicitudes",
+    icon: "icon-note",
+    class: "has-arrow",
+    extralink: false,
+    label: "",
+    labelClass: "",
+    submenu: [
+      {
+        path: "/solicitudes/solicitud",
+        title: "Mis solicitudes",
+        icon: "icon-note",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+      {
+        path: "/solicitudes/consulta",
+        title: "Consulta",
+        icon: "icon-magnifier",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+      {
+        path: "/solicitudes/auditoria",
+        title: "Auditoría",
+        icon: "icon-log",
+        class: "",
+        extralink: false,
+        label: "",
+        labelClass: "",
+        submenu: [],
+      },
+    ],
+  },
+  // {
+  //   path: '',
+  //   title: 'UI Components',
+  //   icon: 'mdi mdi-dots-horizontal',
+  //   class: 'nav-small-cap',
+  //   extralink: true,
+  //   label: '',
+  //   labelClass: '',
+  //   submenu: []
+  // },
+  // {
+  //   path: '',
+  //   title: 'Component',
+  //   icon: 'ti-palette',
+  //   class: 'has-arrow',
+  //   extralink: false,
+  //   label: '',
+  //   labelClass: '',
+  //   submenu: [
+  //     {
+  //       path: '/component/accordion',
+  //       title: 'Accordion',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/alert',
+  //       title: 'Alert',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/badges',
+  //       title: 'Badges',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/buttons',
+  //       title: 'Button',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/carousel',
+  //       title: 'Carousel',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/card',
+  //       title: 'Card',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/dropdown',
+  //       title: 'Dropdown',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/datepicker',
+  //       title: 'Datepicker',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/modal',
+  //       title: 'Modal',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/pagination',
+  //       title: 'Pagination',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/poptool',
+  //       title: 'Popover & Tooltip',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/progressbar',
+  //       title: 'Progressbar',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/rating',
+  //       title: 'Ratings',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/nav',
+  //       title: 'Nav',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: '/component/timepicker',
+  //       title: 'Timepicker',
+  //       icon: 'mdi mdi-adjust',
+  //       class: '',
+  //       extralink: false,
+  //       label: '',
+  //       labelClass: '',
+  //       submenu: []
+  //     },
+  //     {
+  //       path: "/component/toast",
+  //       title: "Toast",
+  //       icon: "mdi mdi-adjust",
+  //       class: "",
+  //       extralink: false,
+  //       label: "",
+  //       labelClass: "",
+  //       submenu: [],
+  //     },
+  //     {
+  //       path: "/component/notifier",
+  //       title: "Notifier",
+  //       icon: "mdi mdi-adjust",
+  //       class: "",
+  //       extralink: false,
+  //       label: "",
+  //       labelClass: "",
+  //       submenu: [],
+  //     },
+  //   ]
+  // }
+];
