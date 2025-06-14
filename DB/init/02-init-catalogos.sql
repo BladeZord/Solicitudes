@@ -1,6 +1,7 @@
 -- =============================================
--- Script de inicialización de catálogos
--- Autor: Sistema de Solicitudes
+-- Script de inicialización de la base de datos
+-- Autor: Kevin Quito
+-- Aplicación: Sistema de Solicitudes
 -- Fecha: 2025-06-12
 -- Descripción: Script para insertar los datos iniciales de catálogos
 -- =============================================

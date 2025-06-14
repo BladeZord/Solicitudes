@@ -8,6 +8,7 @@ import { LogicaComunService } from "../../services/logica-comun.service";
 import { UsuarioType, RolType } from "../../interfaces/usuario.inteface";
 import { HttpErrorResponse } from "@angular/common/http";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { CatalogoService } from "../../services/catalogo.service";
 
 @Component({
   selector: "app-usuario",
@@ -24,9 +25,12 @@ export class UsuarioComponent implements OnInit, OnDestroy {
   numberPages: number[] = [5, 10, 15, 20, 25, 50, 100];
   page = 1;
   pageSize = 5;
+  rolesDisponibles: RolType[] = [];
+  rolesAsignados: RolType[] = [];
 
   constructor(
     private _usuarioService: UsuarioService,
+    private _catalogoService: CatalogoService,
     public _utilService: LogicaComunService,
     private _modalService: NgbModal
   ) {}
@@ -34,6 +38,7 @@ export class UsuarioComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.obtenerDataUsuarios();
     this.reiniciarFormulario();
+    this.cargarRoles();
   }
 
   ngOnDestroy(): void {
@@ -83,6 +88,74 @@ export class UsuarioComponent implements OnInit, OnDestroy {
       size: "md",
       backdrop: 'static',
       keyboard: false
+    });
+  }
+
+  abrirModalRoles(content: any, usuario: UsuarioType): void {
+    this.formulario = { ...usuario };
+    this.cargarRolesUsuario(usuario.id);
+    this._modalService.open(content, {
+      ariaLabelledBy: "modal-basic-title",
+      size: "lg",
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
+
+  cargarRolesUsuario(usuarioId: number): void {
+    this._usuarioService.obtenerRolesPorUsuario(usuarioId).subscribe({
+      next: (roles) => {
+        this.rolesAsignados = roles;
+        this.actualizarRolesDisponibles();
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error(err);
+        this._utilService.mostrarMensaje("error", err.error);
+      }
+    });
+  }
+
+  cargarRoles(): void {
+    this._catalogoService.obtenerCatalogosPorTipo("TIPO_PERSONA").subscribe({
+      next: (roles) => {
+        this.arrayListRoles = roles;
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error("Error al cargar roles:", err);
+        this._utilService.mostrarMensaje("error", err.error);
+      }
+    });
+  }
+
+  actualizarRolesDisponibles(): void {
+    this.rolesDisponibles = this.arrayListRoles.filter(
+      rol => !this.rolesAsignados.some(r => r.id === rol.id)
+    );
+  }
+
+  asignarRol(rolId: number): void {
+    this._usuarioService.asignarRol(this.formulario.id, rolId).subscribe({
+      next: () => {
+        this._utilService.mostrarMensaje("success", "Rol asignado correctamente");
+        this.cargarRolesUsuario(this.formulario.id);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error(err);
+        this._utilService.mostrarMensaje("error", err.error);
+      }
+    });
+  }
+
+  desasignarRol(rolId: number): void {
+    this._usuarioService.desasignarRol(this.formulario.id, rolId).subscribe({
+      next: () => {
+        this._utilService.mostrarMensaje("success", "Rol desasignado correctamente");
+        this.cargarRolesUsuario(this.formulario.id);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error(err);
+        this._utilService.mostrarMensaje("error", err.error);
+      }
     });
   }
 
@@ -260,18 +333,14 @@ export class UsuarioComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const usuario = this.arrayListUsuarios.find(u => u.id === this.formularioPassword.id);
-    if (!usuario) {
-      this._utilService.mostrarMensaje("error", "Usuario no encontrado.");
-      return;
-    }
-
-    usuario.contrasenia = this.formularioPassword.contrasenia;
-    this._usuarioService.actualizarUsuario(usuario).subscribe({
-      next: () => {
+    this._usuarioService.cambiarContrasenia(
+      this.formularioPassword.id,
+      this.formularioPassword.contrasenia
+    ).subscribe({
+      next: (response) => {
         this._utilService.mostrarMensaje(
           "success",
-          "Contraseña actualizada correctamente"
+          response || "Contraseña actualizada correctamente"
         );
         this.cerrarModal();
       },

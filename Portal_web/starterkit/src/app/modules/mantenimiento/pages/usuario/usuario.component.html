@@ -44,17 +44,18 @@
                             <td>{{ usuario?.correo }}</td>
                             <td>{{ usuario?.domicilio }}</td>
                             <td>{{ usuario?.telefono }}</td>
-                            <td>
-                                <button title="Editar" (click)="editarRegistro(modalContent, usuario)"
-                                    class="btn btn-primary me-1 mb-1">
-                                    <i class="fa fa-edit"> </i>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-info me-1" (click)="abrirModalRoles(modalRoles, usuario)">
+                                    <i class="fas fa-id-card"></i>
                                 </button>
-                                <button title="Cambiar Contraseña" (click)="abrirModalPassword(modalPassword, usuario.id)"
-                                    class="btn btn-warning me-1 mb-1">
-                                    <i class="fa fa-key"> </i>
+                                <button class="btn btn-sm btn-warning me-1" (click)="abrirModalPassword(modalPassword, usuario.id)">
+                                    <i class="fas fa-key"></i>
                                 </button>
-                                <button title="Eliminar" (click)="eliminarRegistro(usuario.id)" class="btn btn-danger">
-                                    <i class="fa fa-trash"> </i>
+                                <button class="btn btn-sm btn-primary me-1" (click)="editarRegistro(modalContent, usuario)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" (click)="eliminarRegistro(usuario.id)">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </td>
                         </tr>
@@ -134,30 +135,69 @@
     </div>
 </ng-template>
 
-<!-- Modal de Cambio de Contraseña -->
-<ng-template #modalPassword let-modal>
+<!-- Modal de Roles -->
+<ng-template #modalRoles let-modal>
     <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">Cambiar Contraseña</h4>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()"></button>
+        <h4 class="modal-title">Gestión de Roles - {{formulario.nombre}} {{formulario.apellidos}}</h4>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
     </div>
     <div class="modal-body">
-        <div class="mb-3">
-            <label for="contrasenia" class="form-label">Nueva Contraseña *</label>
-            <input type="password" [(ngModel)]="formularioPassword.contrasenia" class="form-control" id="contrasenia"
-                required />
-        </div>
-        <div class="mb-3">
-            <label for="confirmarContrasenia" class="form-label">Confirmar Contraseña *</label>
-            <input type="password" [(ngModel)]="formularioPassword.confirmarContrasenia" class="form-control"
-                id="confirmarContrasenia" required />
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Roles Asignados</h5>
+                <div class="list-group">
+                    <button *ngFor="let rol of rolesAsignados" 
+                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                            (click)="desasignarRol(rol.id)">
+                        {{rol.descripcion}}
+                        <i class="fas fa-times text-danger"></i>
+                    </button>
+                    <div *ngIf="rolesAsignados.length === 0" class="text-muted">
+                        No hay roles asignados
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h5>Roles Disponibles</h5>
+                <div class="list-group">
+                    <button *ngFor="let rol of rolesDisponibles" 
+                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                            (click)="asignarRol(rol.id)">
+                        {{rol.descripcion}}
+                        <i class="fas fa-plus text-success"></i>
+                    </button>
+                    <div *ngIf="rolesDisponibles.length === 0" class="text-muted">
+                        No hay roles disponibles
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fa fa-times"></i> Cerrar
-        </button>
-        <button type="button" class="btn btn-primary" (click)="cambiarPassword()">
-            <i class="fa fa-save"></i> Guardar
-        </button>
+        <button type="button" class="btn btn-secondary" (click)="modal.close('Close click')">Cerrar</button>
+    </div>
+</ng-template>
+
+<!-- Modal de Cambio de Contraseña -->
+<ng-template #modalPassword let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title">Cambiar Contraseña</h4>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <form>
+        <div class="mb-3">
+                <label for="contrasenia" class="form-label">Nueva Contraseña</label>
+                <input type="password" class="form-control" id="contrasenia" [(ngModel)]="formularioPassword.contrasenia" name="contrasenia" required>
+        </div>
+        <div class="mb-3">
+                <label for="confirmarContrasenia" class="form-label">Confirmar Contraseña</label>
+                <input type="password" class="form-control" id="confirmarContrasenia" [(ngModel)]="formularioPassword.confirmarContrasenia" name="confirmarContrasenia" required>
+        </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('Close click')">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="cambiarPassword()">Guardar</button>
     </div>
 </ng-template>

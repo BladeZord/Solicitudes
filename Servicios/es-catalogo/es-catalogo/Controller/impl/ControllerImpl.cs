@@ -2,9 +2,8 @@
 using es_catalogo.Controller.contract;
 using es_catalogo.Controller.type;
 using es_catalogo.Services.contract;
-
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 using System;
 
@@ -16,6 +15,7 @@ namespace es_catalogo.Controller.impl
     [Route(ApiConstants.Routes.BasePath)]
     [Tags(ApiConstants.Routes.ControllerName)]
     [ApiController]
+    [Authorize(Roles = "ANALISTA")]
     public class ControllerImpl : ControllerBase, IController
     {
         private readonly IService _service;

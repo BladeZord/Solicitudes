@@ -253,17 +253,29 @@ namespace es_usuario.Services.impl
             try
             {
                 _logger.LogInformation(ApiConstants.LogMessages.OperationStart, operation, new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id });
+                if (_repository.ObtenerPorId(usuarioRol.Usuario_Id) == null)
+                {
+                    throw new ServiceException("No existe el usuario")
+                    {
+                        Codigo = TipoError.NO_ENCONTRADO
+                    };
+                }
 
-                var resultado = await _repository.AsignarRolAUsuario(usuarioRol);
+                bool resultado = await _repository.AsignarRolAUsuario(usuarioRol);
 
                 _logger.LogInformation(ApiConstants.LogMessages.OperationEnd, operation, new { usuarioRol.Usuario_Id, usuarioRol.Rol_Id, Status = resultado });
 
                 return resultado;
             }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ApiConstants.LogMessages.OperationError, operation, ex.Message);
-                throw new ServiceException($"Error al asignar rol al usuario: {ex.Message}");
+                throw;
             }
         }
 

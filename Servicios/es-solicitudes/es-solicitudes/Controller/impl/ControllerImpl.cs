@@ -6,6 +6,7 @@ using es_solicitudes.Services.contract;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace es_solicitudes.Controller.impl
 {
@@ -15,6 +16,7 @@ namespace es_solicitudes.Controller.impl
     [Route(ApiConstants.Routes.BasePath)]
     [Tags(ApiConstants.Routes.ControllerName)]
     [ApiController]
+    [Authorize(Roles = "SOLICITANTE,ANALISTA")]
     public class ControllerImpl : ControllerBase, IController
     {
         private readonly IService _service;

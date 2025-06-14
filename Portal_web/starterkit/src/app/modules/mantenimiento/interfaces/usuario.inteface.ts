@@ -11,5 +11,5 @@ export interface UsuarioType {
   domicilio?: string;
   telefono?: string;
   contrasenia: string;
-  roles: string[] | null;
+  roles?: string[] | null;
 }
