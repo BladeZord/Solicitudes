@@ -1,6 +1,6 @@
 export interface RolType{
-  id: number;
-  descripcion: string;
+  rol_Id: number;
+  usuario_Id: string;
 }
 
 export interface UsuarioType {
