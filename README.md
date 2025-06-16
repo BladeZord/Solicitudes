@@ -4,14 +4,14 @@ Aplicación full-stack para la gestión de solicitudes desarrollada con Angular 
 
 ## 📋 Tabla de Contenidos
 
-- [Requisitos del Sistema](#requisitos-del-sistema)
-- [Tecnologías Utilizadas](#tecnologías-utilizadas)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Configuración de la Base de Datos](#configuración-de-la-base-de-datos)
-- [Instalación y Configuración](#instalación-y-configuración)
-- [Ejecución con Docker](#ejecución-con-docker)
-- [Ejecución Manual](#ejecución-manual)
-- [Solución de Problemas](#solución-de-problemas)
+- [Requisitos del Sistema](#-requisitos-del-sistema)
+- [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Configuración de la Base de Datos](#-configuración-de-la-base-de-datos)
+- [Instalación y Configuración](#-instalación-y-configuración)
+- [Ejecución con Docker](#-ejecución-con-docker)
+- [Ejecución Manual](#-ejecución-manual)
+- [Solución de Problemas](#-solución-de-problemas)
 
 ## 🖥️ Requisitos del Sistema
 
