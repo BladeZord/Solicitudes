@@ -115,20 +115,20 @@ builder.Services.AddControllers()
 
 var app = builder.Build();
 
+
 // Pipeline HTTP
-if (!app.Environment.IsProduction())
+//if (!app.Environment.IsProduction())
+//{
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{ApiConstants.Routes.ControllerName} v1");
-        c.RoutePrefix = "swagger";
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{ApiConstants.Routes.ControllerName} v1");
+    c.RoutePrefix = "swagger";
+});
+//}
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("NUXT");
-app.UseHttpsRedirection();
 
 // Agregar autenticación y autorización
 app.UseAuthentication();

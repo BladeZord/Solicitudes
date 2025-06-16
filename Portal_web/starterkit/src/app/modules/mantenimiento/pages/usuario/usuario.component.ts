@@ -6,6 +6,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { CatalogoService } from "../../services/catalogo.service";
 import { CatalogoType } from "../../interfaces/catalogo.interface";
+import { firstValueFrom } from "rxjs";
 
 @Component({
   selector: "app-usuario",
@@ -26,8 +27,8 @@ export class UsuarioComponent implements OnInit, OnDestroy {
   numberPages: number[] = [5, 10, 15, 20, 25, 50, 100];
   page = 1;
   pageSize = 5;
-  rolesDisponibles: RolType[] = [];
-  rolesAsignados: RolType[] = [];
+  rolesDisponibles: CatalogoType[] = [];
+  rolesAsignados: CatalogoType[] = [];
 
   constructor(
     private _usuarioService: UsuarioService,
@@ -105,8 +106,15 @@ export class UsuarioComponent implements OnInit, OnDestroy {
 
   cargarRolesUsuario(usuarioId: number): void {
     this._usuarioService.obtenerRolesPorUsuario(usuarioId).subscribe({
-      next: (roles) => {
-        this.rolesAsignados = roles;
+      next: async (roles) => {
+        // Obtener la información del catálogo para cada rol
+        const rolesPromises = roles.map(async rol => {
+          const catalogos = await firstValueFrom(this._catalogoService.obtenerCatalogosPorTipo("TIPO_PERSONA"));
+          return catalogos.find(cat => cat.id === rol.rol_Id);
+        });
+
+        const catalogos = await Promise.all(rolesPromises);
+        this.rolesAsignados = catalogos.filter(cat => cat !== undefined) as CatalogoType[];
         this.actualizarRolesDisponibles();
       },
       error: (err: HttpErrorResponse) => {
@@ -130,7 +138,7 @@ export class UsuarioComponent implements OnInit, OnDestroy {
 
   actualizarRolesDisponibles(): void {
     this.rolesDisponibles = this.arrayListRoles.filter(
-      (rol) => !this.rolesAsignados.some((r) => r.rol_Id === rol.id)
+      (rol) => !this.rolesAsignados.some((r) => r.id === rol.id)
     );
   }
 

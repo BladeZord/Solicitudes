@@ -1,6 +1,6 @@
 export interface RolType{
   rol_Id: number;
-  usuario_Id: string;
+  usuario_Id: number;
 }
 
 export interface UsuarioType {

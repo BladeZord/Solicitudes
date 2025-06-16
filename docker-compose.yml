@@ -1,0 +1,71 @@
+version: '3.8'
+
+name: gsc
+
+services:
+  # Grupo Portal Web
+  portal-web:
+    build:
+      context: ./Portal_web/starterkit
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - es-catalogo
+      - es-solicitudes
+      - es-usuario
+    networks:
+      - gsc-network
+    labels:
+      - "com.gsc.group=portal-web"
+
+  # Grupo Servicios
+  es-catalogo:
+    build:
+      context: ./Servicios/es-catalogo/es-catalogo
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - gsc-network
+    labels:
+      - "com.gsc.group=servicios"
+
+  es-solicitudes:
+    build:
+      context: ./Servicios/es-solicitudes/es-solicitudes
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - gsc-network
+    labels:
+      - "com.gsc.group=servicios"
+
+  es-usuario:
+    build:
+      context: ./Servicios/es-usuario/es-usuario
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - gsc-network
+    labels:
+      - "com.gsc.group=servicios"
+
+networks:
+  gsc-network:
+    name: gsc-network
+    driver: bridge 
