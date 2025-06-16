@@ -9,8 +9,8 @@ Aplicación full-stack para la gestión de solicitudes desarrollada con Angular 
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Configuración de la Base de Datos](#configuración-de-la-base-de-datos)
 - [Instalación y Configuración](#instalación-y-configuración)
-- [Ejecución de los Servicios](#ejecución-de-los-servicios)
-- [Ejecución del Portal Web](#ejecución-del-portal-web)
+- [Ejecución con Docker](#ejecución-con-docker)
+- [Ejecución Manual](#ejecución-manual)
 - [Solución de Problemas](#solución-de-problemas)
 
 ## 🖥️ Requisitos del Sistema
@@ -25,9 +25,14 @@ Aplicación full-stack para la gestión de solicitudes desarrollada con Angular 
 - **Visual Studio 2022** (recomendado) o **Visual Studio Code**
 - **SQL Server**: SQL Server 2019 o superior, o SQL Server Express
 
+### Para Docker
+- **Docker Desktop**: Versión 4.0.0 o superior
+- **Docker Compose**: Versión 2.0.0 o superior
+
 ### Para la Base de Datos
 - **SQL Server**: SQL Server 2019 o superior
 - **SQL Server Management Studio (SSMS)** (opcional, para administración)
+- **DBearver** (opcional, para administración)
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -49,6 +54,11 @@ Aplicación full-stack para la gestión de solicitudes desarrollada con Angular 
 - **SQL Server**: Motor de base de datos
 - **T-SQL**: Lenguaje de consultas
 
+### Infraestructura
+- **Docker**: Contenedorización
+- **Docker Compose**: Orquestación de contenedores
+- **Nginx**: Servidor web y proxy inverso
+
 ## 📁 Estructura del Proyecto
 
 ```
@@ -69,7 +79,7 @@ Solicitudes/
 ### Paso 1: Instalar SQL Server
 1. Descarga SQL Server desde [Microsoft](https://www.microsoft.com/es-es/sql-server/sql-server-downloads)
 2. Instala SQL Server Express (gratuito) o Developer Edition
-3. Durante la instalación, configura una contraseña para el usuario 'sa'
+3. Durante la instalación, configura una contraseña para el usuario 'sa' o el que detallas el Script
 
 ### Paso 2: Ejecutar Scripts de Base de Datos
 1. Abre **SQL Server Management Studio (SSMS)** o **Azure Data Studio**
@@ -91,7 +101,6 @@ Solicitudes/
 - Base de datos `SolicitudesDB`
 - Tablas: Usuarios, Solicitudes, Catalogos, Log_auditoria, Usuario_Roles
 - Datos iniciales de catálogos y usuario administrador
-- 
 
 ## 🚀 Instalación y Configuración
 
@@ -102,7 +111,7 @@ cd Solicitudes
 git checkout dev
 ```
 
-**⚠️ Importante**: El contenido del proyecto se encuentra en la rama `dev` del repositorio de GitHub. Asegúrate de cambiar a esta rama después de clonar.
+**⚠️ Importante**: El contenido del proyecto se encuentra en la rama `dev` del repositorio de GitHub. Asegúrate de cambiar a esta rama después de clonar, ya que esta es la mas actualizada. 
 
 ### Paso 2: Configurar Variables de Entorno
 Antes de ejecutar los servicios, necesitas configurar las cadenas de conexión:
@@ -115,17 +124,46 @@ Cambia la cadena de conexión por la de tu servidor:
 ```json
 {
   "ConnectionStrings": {
-    "SQLConnection": "Server=TU_SERVIDOR;Database=SolicitudesDB;User Id=TU_USUARIO;Password=TU_PASSWORD;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true;Connection Timeout=30;Application Name=es-solicitudes"
+    "SQLConnection": "Server=host.docker.internal,1433;Database=SolicitudesDB;User Id=TU_USUARIO;Password=TU_PASSWORD;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true;Connection Timeout=30;Application Name=es-solicitudes"
   }
 }
 ```
 
-**Ejemplo para SQL Server Express local**:
-```json
-"SQLConnection": "Server=localhost\\SQLEXPRESS;Database=SolicitudesDB;User Id=sa;Password=TuPassword;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true;Connection Timeout=30;Application Name=es-solicitudes"
+## 🐳 Ejecución con Docker
+
+### Paso 1: Verificar Docker
+Asegúrate de que Docker Desktop esté instalado y en ejecución:
+```bash
+docker --version
+docker-compose --version
 ```
 
-## ⚙️ Ejecución de los Servicios
+### Paso 2: Construir y Ejecutar los Contenedores
+1. Desde la raíz del proyecto, ejecuta:
+```bash
+docker-compose up --build
+```
+
+2. Los servicios estarán disponibles en:
+   - Portal Web: `http://localhost`
+   - Servicio de Usuarios: `http://localhost:8080`
+   - Servicio de Catálogos: `http://localhost:8081`
+   - Servicio de Solicitudes: `http://localhost:8082`
+
+### Paso 3: Verificar los Servicios
+1. Abre tu navegador y visita:
+   - Portal Web: `http://localhost`
+   - Swagger de Usuarios: `http://localhost:8080/swagger`
+   - Swagger de Catálogos: `http://localhost:8081/swagger`
+   - Swagger de Solicitudes: `http://localhost:8082/swagger`
+
+### Paso 4: Detener los Contenedores
+Para detener los contenedores:
+```bash
+docker-compose down
+```
+
+## ⚙️ Ejecución Manual
 
 ### Opción 1: Desde Visual Studio (Recomendado para principiantes)
 1. Abre Visual Studio 2022
@@ -155,48 +193,23 @@ cd Servicios/es-usuario/es-usuario
 dotnet run
 ```
 
-### Verificar que los Servicios Funcionen
-1. Abre tu navegador
-2. Visita las URLs de Swagger para cada servicio:
-   - `https://localhost:7001/swagger`
-   - `https://localhost:7002/swagger`
-   - `https://localhost:7003/swagger`
-3. Deberías ver la documentación de la API
-
-## 🌐 Ejecución del Portal Web
-
-### Paso 1: Instalar Dependencias
+### Ejecución del Portal Web
 1. Abre una terminal en la carpeta del portal:
 ```bash
 cd Portal_web/starterkit
 ```
 
-2. Instala las dependencias de Node.js:
+2. Instala las dependencias:
 ```bash
 npm install
 ```
 
-**Nota**: Este proceso puede tomar varios minutos la primera vez.
-
-### Paso 2: Configurar URLs de los Servicios
-1. Abre el archivo `src/environments/environment.ts`
-2. Asegúrate de que las URLs de los servicios coincidan con las que están ejecutándose:
-```typescript
-export const environment = {
-  production: false,
-  solicitudUrl: 'https://localhost:7001/v1/es/solicitudes', // Servicio de solicitudes
-  catalogoUrl: 'https://localhost:7002/v1/es/catalogo', // Servicio de catálogos
-  usuarioUrl: 'https://localhost:7003/v1/es/usuario' // Servicio de usuarios
-};
-```
-
-### Paso 3: Ejecutar el Portal
+3. Ejecuta el portal:
 ```bash
 npm start
-ng serve -o
 ```
 
-El portal se abrirá automáticamente en `http://localhost:4200`
+El portal se abrirá en `http://localhost:4200`
 
 ## 🔧 Solución de Problemas
 
@@ -222,6 +235,12 @@ El portal se abrirá automáticamente en `http://localhost:4200`
 - Verifica que todos los servicios estén ejecutándose
 - Confirma que las URLs en el portal coincidan con los puertos de los servicios
 - Revisa la consola del navegador para errores de CORS
+
+### Problemas con Docker
+- Verifica que Docker Desktop esté en ejecución
+- Asegúrate de que los puertos no estén en uso
+- Revisa los logs de los contenedores con `docker-compose logs`
+- Limpia los contenedores y volúmenes con `docker-compose down -v`
 
 ## 📞 Soporte
 

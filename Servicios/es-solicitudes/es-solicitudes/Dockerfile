@@ -4,28 +4,21 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
 
 
 # Esta fase se usa para compilar el proyecto de servicio
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["es-solicitudes.csproj", "./"]
-# COPY ["es-usuario/es-usuario.csproj", "es-usuario/"]
-
-RUN dotnet restore
 COPY . .
-RUN dotnet build -c Release -o /app/build
-
-# Esta fase se usa para publicar el proyecto de servicio que se copiará en la fase final.
-FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish
 
 # Esta fase se usa en producción o cuando se ejecuta desde VS en modo normal (valor predeterminado cuando no se usa la configuración de depuración)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENV ASPNETCORE_URLS=http://+:80
-EXPOSE 80
+COPY --from=build /app/publish .
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
 ENTRYPOINT ["dotnet", "es-solicitudes.dll"]
